@@ -4,7 +4,7 @@ export interface OrderItem {
     type: string;
     quantity: number;
     price: number;
-    option: OrderOption;
+    options: OrderOption[]; // multi-select options
 }
 
 export interface Order {
@@ -16,6 +16,7 @@ export interface Order {
     change: number;
     date: string;
     status: 'pending' | 'completed' | 'picked_up' | 'cancelled';
+    catatan: string;
     createdAt: number;
 }
 
