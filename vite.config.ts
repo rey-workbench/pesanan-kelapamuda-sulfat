@@ -8,7 +8,7 @@ export default defineConfig({
         tailwindcss(),
         sveltekit(),
         SvelteKitPWA({
-            registerType: 'autoUpdate',
+            registerType: 'prompt',
             injectRegister: 'auto',
             manifest: {
                 name: 'Es Kelapa Muda Sulfat',
