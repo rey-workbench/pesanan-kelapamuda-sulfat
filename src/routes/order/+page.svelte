@@ -1,11 +1,12 @@
 <script lang="ts">
-    import { User, Plus, Minus, ChevronDown } from "lucide-svelte";
+    import { User, Plus, Minus } from "lucide-svelte";
     import { ui } from "$lib/state/ui.svelte";
     import Modal from "$lib/components/layout/Modal.svelte";
     import SectionHeader from "$lib/components/shared/SectionHeader.svelte";
     import Button from "$lib/components/ui/Button.svelte";
     import Card from "$lib/components/ui/Card.svelte";
     import Input from "$lib/components/ui/Input.svelte";
+    import Toggle from "$lib/components/ui/Toggle.svelte";
     import CartSummary from "./components/CartSummary.svelte";
     import MenuSelection from "./components/MenuSelection.svelte";
     import { OrderState } from "$lib/state/order.svelte";
@@ -129,41 +130,27 @@
 
     <!-- Cash payment toggle -->
     <section class="space-y-2">
-        <div class="flex justify-between items-center px-1">
-            <SectionHeader title="Bayar Tunai" />
-            <!-- Toggle pill: green=active, slate=inactive -->
-            <button
-                role="switch"
-                aria-checked={state.showCashCard}
-                onclick={() => (state.showCashCard = !state.showCashCard)}
-                class="flex items-center gap-2 h-9 px-3.5 rounded-full border-2 font-bold text-xs transition-all duration-200 {state.showCashCard
-                    ? 'bg-emerald-600 border-emerald-600 text-white'
-                    : 'bg-white border-slate-200 text-slate-500'}"
-            >
-                <span
-                    class="w-2 h-2 rounded-full transition-all {state.showCashCard
-                        ? 'bg-white'
-                        : 'bg-slate-300'}"
-                ></span>
-                {state.showCashCard ? "Aktif" : "Nonaktif"}
-            </button>
-        </div>
+        <Toggle
+            bind:checked={state.showCashCard}
+            label="Bayar Tunai"
+            ariaLabel="Aktifkan pembayaran tunai"
+        />
 
         {#if state.showCashCard}
             <Card
-                variant="slate"
+                variant="emerald"
                 padding="md"
                 class="space-y-4 animate-in slide-in-from-top-2 fade-in duration-200"
             >
                 <div class="space-y-2">
                     <label
                         for="cashInput"
-                        class="text-[9px] font-black text-slate-300 uppercase tracking-widest"
+                        class="text-[9px] font-black text-emerald-700 uppercase tracking-widest"
                         >Uang Diterima (Rp)</label
                     >
                     <div class="relative">
                         <span
-                            class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm"
+                            class="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 font-bold text-sm"
                             >Rp</span
                         >
                         <input
@@ -174,23 +161,23 @@
                             placeholder="0"
                             onfocus={(e) =>
                                 (e.target as HTMLInputElement).select()}
-                            class="w-full h-14 pl-12 pr-4 bg-slate-800 rounded-xl border border-slate-700 text-white font-black font-mono text-2xl outline-none focus:border-emerald-500 transition-colors"
+                            class="w-full h-14 pl-12 pr-4 bg-white rounded-xl border-2 border-emerald-200 text-slate-900 font-black font-mono text-2xl outline-none focus:border-emerald-500 transition-colors"
                         />
                     </div>
                 </div>
                 {#if state.cash !== null && state.cash > 0}
                     <div
-                        class="flex justify-between items-center pt-2 border-t border-slate-700"
+                        class="flex justify-between items-center pt-2 border-t border-emerald-200"
                     >
                         <span
-                            class="text-xs font-bold text-slate-400 uppercase tracking-widest"
+                            class="text-xs font-bold text-emerald-700 uppercase tracking-widest"
                             >Kembalian</span
                         >
                         <span
                             class="text-xl font-black font-mono {state.change >=
                             0
-                                ? 'text-emerald-400'
-                                : 'text-red-400'}"
+                                ? 'text-emerald-700'
+                                : 'text-red-600'}"
                         >
                             {state.change >= 0
                                 ? "+"

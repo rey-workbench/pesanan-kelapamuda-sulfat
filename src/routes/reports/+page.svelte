@@ -40,60 +40,59 @@
 </script>
 
 <div class="container-sm pb-28 space-y-5 mt-3 animate-in">
-    <!-- Single-row controls -->
-    <div class="flex gap-2 items-center">
-        <!-- Filter chip -->
-        <Button
-            variant="unstyled"
-            size="sm"
-            class="flex-1 flex items-center gap-2 h-11 bg-white rounded-xl px-3 border border-slate-200 shadow-sm text-left min-w-0"
-            onclick={() => (state.showCalendar = true)}
+    <!-- Date mode tabs: Hari Ini / Semua / Custom -->
+    <div class="space-y-2">
+        <div
+            class="flex bg-slate-100 p-1 rounded-xl border border-slate-200 gap-1"
         >
-            <History
-                size={15}
-                strokeWidth={2.5}
-                class="text-slate-400 shrink-0"
-            />
-            <span class="text-xs font-bold text-slate-700 truncate">
-                {state.filterDate
+            <Button
+                variant="unstyled"
+                size="sm"
+                class="flex-1 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap {state.filterDate ===
+                new Date().toISOString().split('T')[0]
+                    ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                    : 'text-slate-500'}"
+                onclick={() =>
+                    (state.filterDate = new Date().toISOString().split("T")[0])}
+            >
+                Hari Ini
+            </Button>
+            <Button
+                variant="unstyled"
+                size="sm"
+                class="flex-1 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap {!state.filterDate
+                    ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                    : 'text-slate-500'}"
+                onclick={() => (state.filterDate = "")}
+            >
+                Semua
+            </Button>
+            <Button
+                variant="unstyled"
+                size="sm"
+                class="flex-1 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap {state.filterDate &&
+                state.filterDate !== new Date().toISOString().split('T')[0]
+                    ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
+                    : 'text-slate-500'}"
+                onclick={() => (state.showCalendar = true)}
+            >
+                {state.filterDate &&
+                state.filterDate !== new Date().toISOString().split("T")[0]
                     ? state.filterDate.split("-").reverse().join("/")
-                    : "Semua Tanggal"}
-            </span>
-            {#if state.filterDate}
-                <Button
-                    variant="unstyled"
-                    size="sm"
-                    class="ml-auto w-5 h-5 p-0 flex-none flex items-center justify-center rounded-full bg-emerald-100 text-emerald-700"
-                    onclick={(e) => {
-                        e.stopPropagation();
-                        state.filterDate = "";
-                    }}
-                >
-                    <X size={10} strokeWidth={3} />
-                </Button>
-            {/if}
-        </Button>
-
-        <!-- Calendar trigger -->
-        <Button
-            variant={state.filterDate ? "emerald" : "secondary"}
-            size="sm"
-            class="flex-none w-11 h-11 p-0 rounded-xl"
-            onclick={() => (state.showCalendar = true)}
-        >
-            <CalendarIcon size={18} strokeWidth={2.5} />
-        </Button>
+                    : "Pilih Tanggal"}
+            </Button>
+        </div>
 
         <!-- Export -->
         <Button
             variant="emerald"
             size="sm"
-            class="flex-none h-11 px-3 rounded-xl"
+            class="w-full h-11"
             onclick={() => state.exportToExcel()}
             disabled={state.filteredOrders.length === 0}
         >
             <Download size={16} strokeWidth={2.5} />
-            <span class="hidden sm:inline text-xs">Export</span>
+            Export Excel ({state.filteredOrders.length} Pesanan)
         </Button>
     </div>
 

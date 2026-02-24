@@ -60,7 +60,7 @@
                         </div>
                         <div class="grow min-w-0">
                             <h2
-                                class="font-black text-lg tracking-tight leading-none mb-0.5 truncate {state.activeTab ===
+                                class="font-black text-base tracking-tight leading-tight mb-0.5 line-clamp-2 {state.activeTab ===
                                 'ready'
                                     ? 'text-emerald-950'
                                     : 'text-slate-900'}"
@@ -103,10 +103,28 @@
                     <OrderNote catatan={item.catatan} />
                 </div>
 
-                <div class="space-y-2.5 mb-4">
+                <div class="space-y-2.5 mb-3">
                     {#each item.items as subItem}
                         <OrderItemDisplay item={subItem} status={item.status} />
                     {/each}
+                </div>
+
+                <!-- Total -->
+                <div
+                    class="flex justify-between items-center py-2.5 mb-3 border-t border-slate-100"
+                >
+                    <span
+                        class="text-[10px] font-black text-slate-400 uppercase tracking-widest"
+                        >Total</span
+                    >
+                    <span
+                        class="font-black font-mono text-base {state.activeTab ===
+                        'ready'
+                            ? 'text-emerald-700'
+                            : 'text-slate-900'}"
+                    >
+                        {formatCurrency(item.total)}
+                    </span>
                 </div>
 
                 {#if state.activeTab === "pending"}

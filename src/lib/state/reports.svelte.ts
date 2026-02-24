@@ -8,6 +8,8 @@ export class ReportsState {
 
     constructor(initialData: { orders: Order[]; settings: AppSettings }) {
         this.data = initialData;
+        // Default to today
+        this.filterDate = new Date().toISOString().split('T')[0];
     }
 
     updateData(newData: { orders: Order[]; settings: AppSettings }) {
