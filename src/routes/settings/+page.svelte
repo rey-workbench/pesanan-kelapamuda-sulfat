@@ -231,7 +231,7 @@
                 <div
                     class="flex gap-2 items-center bg-white p-3 rounded-xl shadow-sm border border-slate-200 animate-in slide-in-from-right-4 duration-200"
                 >
-                    <div class="flex-grow">
+                    <div class="grow">
                         <label for="opt-{i}" class="sr-only">Nama Opsi</label>
                         <input
                             id="opt-{i}"

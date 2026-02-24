@@ -35,7 +35,7 @@
 		</div>
 	{/if}
 
-	<main class="flex-grow pb-20">
+	<main class="grow pb-20">
 		{@render children()}
 	</main>
 

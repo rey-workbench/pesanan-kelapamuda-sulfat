@@ -21,6 +21,7 @@
     let customerName = $state(""); // Sekarang opsional
     let cart = $state<OrderItem[]>([]);
     let cash = $state<number | null>(null);
+    let showCashCard = $state(false);
     let showConfirmModal = $state(false);
 
     let total = $derived(
@@ -77,7 +78,10 @@
     }
 
     function triggerOrder() {
-        if (cart.length === 0 || (cash !== null && cash !== 0 && cash < total))
+        if (
+            cart.length === 0 ||
+            (showCashCard && cash !== null && cash !== 0 && cash < total)
+        )
             return;
         showConfirmModal = true;
     }
@@ -95,14 +99,15 @@
                 customerName: customerName.trim() || "Pelanggan Umum",
                 items: $state.snapshot(cart),
                 total,
-                cash: cash || 0,
-                change,
+                cash: showCashCard ? cash || 0 : 0,
+                change: showCashCard ? change : 0,
                 date: new Date().toISOString().split("T")[0],
             });
 
             customerName = "";
             cart = [];
             cash = null;
+            showCashCard = false;
             await invalidateAll();
 
             // Sedikit delay agar user sempat melihat modal "Berhasil" atau transisinya halus
@@ -348,59 +353,92 @@
         </div>
     </section>
 
+    <!-- Payment Section Toggle -->
+    <div
+        class="mt-8 flex items-center justify-between bg-emerald-50 p-4 rounded-2xl border border-emerald-100"
+    >
+        <label for="cash-toggle" class="flex items-center gap-3 cursor-pointer">
+            <span class="text-sm font-bold text-emerald-900"
+                >Hitung Kembalian Tunai?</span
+            >
+        </label>
+        <button
+            id="cash-toggle"
+            type="button"
+            role="switch"
+            aria-checked={showCashCard}
+            aria-label="Hitung Kembalian Tunai Toggle"
+            onclick={() => (showCashCard = !showCashCard)}
+            class="relative inline-flex h-7 w-12 items-center rounded-full transition-colors {showCashCard
+                ? 'bg-emerald-500'
+                : 'bg-emerald-200'}"
+        >
+            <span
+                class="inline-block h-5 w-5 transform rounded-full bg-white transition-transform {showCashCard
+                    ? 'translate-x-6'
+                    : 'translate-x-1'} shadow-sm"
+            ></span>
+        </button>
+    </div>
+
     <!-- Payment Section -->
-    <section class="simple-card bg-emerald-900 text-white p-6 md:p-8 mt-6">
-        <div class="space-y-6">
-            <div class="space-y-3">
-                <label
-                    for="cashInput"
-                    class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest px-1"
-                    >Uang Tunai</label
+    {#if showCashCard}
+        <section
+            class="simple-card bg-emerald-900 text-white p-6 md:p-8 mt-4 animate-in slide-in-from-top-4 fade-in duration-300"
+        >
+            <div class="space-y-6">
+                <div class="space-y-3">
+                    <label
+                        for="cashInput"
+                        class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest px-1"
+                        >Uang Tunai</label
+                    >
+                    <div class="relative">
+                        <span
+                            class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xl"
+                            >Rp</span
+                        >
+                        <input
+                            id="cashInput"
+                            type="number"
+                            inputmode="numeric"
+                            bind:value={cash}
+                            placeholder="0"
+                            class="w-full h-16 pl-14 pr-5 bg-white rounded-xl border-none font-black text-2xl text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/30 transition-shadow font-mono"
+                        />
+                    </div>
+                </div>
+
+                <div
+                    class="flex justify-between items-end border-t border-emerald-800 pt-6"
                 >
-                <div class="relative">
-                    <span
-                        class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xl"
-                        >Rp</span
-                    >
-                    <input
-                        id="cashInput"
-                        type="number"
-                        inputmode="numeric"
-                        bind:value={cash}
-                        placeholder="0"
-                        class="w-full h-16 pl-14 pr-5 bg-white rounded-xl border-none font-black text-2xl text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/30 transition-shadow font-mono"
-                    />
+                    <div class="flex flex-col">
+                        <span
+                            class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-1"
+                            >Kembalian</span
+                        >
+                        <span
+                            class="text-2xl font-bold font-mono tracking-tighter"
+                            >{formatCurrency(change)}</span
+                        >
+                    </div>
                 </div>
             </div>
+        </section>
+    {/if}
 
-            <div
-                class="flex justify-between items-end border-t border-emerald-800 pt-6"
-            >
-                <div class="flex flex-col">
-                    <span
-                        class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-1"
-                        >Kembalian</span
-                    >
-                    <span class="text-2xl font-bold font-mono tracking-tighter"
-                        >{formatCurrency(change)}</span
-                    >
-                </div>
-            </div>
-
-            <button
-                onclick={triggerOrder}
-                disabled={ui.loading.show ||
-                    cart.length === 0 ||
-                    (cash !== null && cash !== 0 && cash < total)}
-                class="w-full h-16 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl font-bold text-sm shadow-lg active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-3 uppercase tracking-widest mt-4"
-            >
-                {ui.loading.show ? "Memproses..." : "Simpan Pesanan"}
-                {#if !ui.loading.show}
-                    <ChevronRight size={20} strokeWidth={3} />
-                {/if}
-            </button>
-        </div>
-    </section>
+    <button
+        onclick={triggerOrder}
+        disabled={ui.loading.show ||
+            cart.length === 0 ||
+            (showCashCard && cash !== null && cash !== 0 && cash < total)}
+        class="w-full h-16 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm shadow-lg active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-3 uppercase tracking-widest mt-6"
+    >
+        {ui.loading.show ? "Memproses..." : "Simpan Pesanan"}
+        {#if !ui.loading.show}
+            <ChevronRight size={20} strokeWidth={3} />
+        {/if}
+    </button>
 </div>
 
 <Modal

@@ -154,7 +154,7 @@
         {#each filteredHistory as item (item.id)}
             <div class="simple-card group">
                 <div class="flex justify-between items-start mb-5">
-                    <div class="space-y-1.5 flex-grow min-w-0 mr-4">
+                    <div class="space-y-1.5 grow min-w-0 mr-4">
                         <h4
                             class="font-bold text-slate-900 text-lg leading-tight truncate"
                         >
