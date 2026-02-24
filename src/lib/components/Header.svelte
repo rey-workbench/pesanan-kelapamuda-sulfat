@@ -11,79 +11,71 @@
     } = $props();
 </script>
 
-<header
-    class="bg-white border-b-4 border-slate-950 px-6 pt-10 pb-8 sticky top-0 z-50"
->
+<header class="bg-white border-b border-slate-200 px-4 py-3 sticky top-0 z-50">
     <div class="max-w-md mx-auto">
-        <div class="flex justify-between items-start mb-6">
-            <div class="flex items-center gap-4">
+        <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
                 {#if showBack}
                     <button
                         onclick={() => history.back()}
-                        class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-50 text-slate-950 border-2 border-slate-200 shadow-sm active:scale-90 transition-all hover:bg-slate-100"
+                        class="w-9 h-9 flex-none flex items-center justify-center rounded-lg bg-slate-50 text-slate-900 active:scale-95 transition-all hover:bg-slate-100 border border-slate-200 shadow-sm"
                     >
-                        <ChevronLeft size={24} strokeWidth={4} />
+                        <ChevronLeft size={20} strokeWidth={2.5} />
                     </button>
                 {/if}
-                <div class="space-y-1">
+                <div class="min-w-0 flex flex-col justify-center">
+                    {#if subtitle}
+                        <p
+                            class="text-[9px] font-bold text-slate-500 uppercase tracking-widest truncate leading-tight mb-0.5"
+                        >
+                            {subtitle}
+                        </p>
+                    {/if}
                     <h1
-                        class="text-3xl font-black text-slate-950 tracking-tighter uppercase leading-none"
+                        class="text-lg font-black text-slate-900 tracking-tight leading-none truncate"
                     >
                         {title}
                     </h1>
-                    <p
-                        class="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]"
-                    >
-                        {subtitle}
-                    </p>
                 </div>
             </div>
 
-            <button
-                onclick={() => goto("/settings")}
-                class="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-950 border-2 border-slate-200 shadow-sm active:scale-90 transition-all hover:bg-slate-200"
-            >
-                <SettingsIcon size={24} strokeWidth={3} />
-            </button>
-        </div>
-
-        {#if pending !== null}
-            <div class="flex gap-4 mt-8">
-                <div
-                    class="flex-1 bg-slate-950 p-5 rounded-[1.5rem] border-2 border-slate-800 shadow-xl"
-                >
-                    <p
-                        class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2"
+            <div class="flex items-center gap-2.5 flex-none">
+                {#if pending !== null}
+                    <div
+                        class="flex items-center bg-slate-50 rounded-lg p-1 border border-slate-200 shadow-sm"
                     >
-                        Menunggu
-                    </p>
-                    <div class="flex items-center justify-between">
-                        <span
-                            class="text-3xl font-black text-white font-mono leading-none"
-                            >{pending}</span
-                        >
                         <div
-                            class="w-2 h-2 rounded-full bg-slate-400 animate-pulse"
-                        ></div>
-                    </div>
-                </div>
-                <div
-                    class="flex-1 bg-white p-5 rounded-[1.5rem] border-2 border-slate-950 shadow-md"
-                >
-                    <p
-                        class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2"
-                    >
-                        Selesai
-                    </p>
-                    <div class="flex items-center justify-between">
-                        <span
-                            class="text-3xl font-black text-slate-950 font-mono leading-none"
-                            >{completed}</span
+                            class="flex items-center px-1.5 gap-1.5"
+                            title="Menunggu"
                         >
-                        <div class="w-2 h-2 rounded-full bg-slate-950"></div>
+                            <span
+                                class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_4px_rgba(16,185,129,0.5)]"
+                            ></span>
+                            <span class="text-xs font-bold text-slate-700"
+                                >{pending}</span
+                            >
+                        </div>
+                        <div class="w-px h-3 bg-slate-300 mx-0.5"></div>
+                        <div
+                            class="flex items-center px-1.5 gap-1.5"
+                            title="Selesai"
+                        >
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"
+                            ></span>
+                            <span class="text-xs font-bold text-slate-700"
+                                >{completed}</span
+                            >
+                        </div>
                     </div>
-                </div>
+                {/if}
+
+                <button
+                    onclick={() => goto("/settings")}
+                    class="w-9 h-9 flex-none flex items-center justify-center rounded-lg bg-emerald-600 text-white active:scale-95 transition-colors hover:bg-emerald-700 shadow-md border border-emerald-500"
+                >
+                    <SettingsIcon size={18} strokeWidth={2} />
+                </button>
             </div>
-        {/if}
+        </div>
     </div>
 </header>

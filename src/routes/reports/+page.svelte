@@ -69,93 +69,74 @@
 
 <Header title={settings?.storeName} subtitle="Riwayat Transaksi" />
 
-<div class="px-5 pb-32 space-y-10 animate-in mt-6 max-w-md mx-auto">
+<div class="px-5 pb-32 space-y-8 mt-4 max-w-md mx-auto">
     <!-- Controls -->
-    <div class="flex flex-col gap-6">
+    <div class="flex flex-col gap-4">
         <div class="relative group">
-            <Search
-                class="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-slate-950 transition-colors"
-                size={20}
-                strokeWidth={4}
-            />
+            <Search class="input-pos-icon" size={20} strokeWidth={2.5} />
             <input
                 type="text"
                 bind:value={searchTerm}
                 placeholder="Cari pelanggan atau menu..."
-                class="w-full h-14 pl-14 pr-5 bg-white rounded-2xl border-2 border-slate-200 shadow-sm focus:border-slate-950 focus:ring-4 focus:ring-slate-950/10 transition-all outline-none text-base font-black text-slate-950"
+                class="input-pos pl-11"
             />
         </div>
 
         <button
             onclick={exportData}
-            class="h-14 w-full bg-slate-100 text-slate-950 rounded-2xl font-black flex items-center justify-center gap-3 text-[11px] tracking-[0.2em] shadow-md hover:bg-slate-200 active:scale-[0.98] transition-all border-2 border-slate-200"
+            class="btn-secondary h-12 text-[10px] tracking-widest uppercase flex gap-2"
         >
-            <Download size={20} class="text-slate-950" strokeWidth={4} /> EXPORT
-            LAPORAN
+            <Download size={18} strokeWidth={3} /> EXPORT LAPORAN
         </button>
     </div>
 
     <!-- History List -->
-    <div class="space-y-6">
+    <div class="space-y-4">
         <div class="flex items-center justify-between px-1">
             <h3
-                class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]"
+                class="text-[10px] font-bold text-slate-500 uppercase tracking-widest"
             >
                 Semua Transaksi
             </h3>
             <span
-                class="text-[10px] font-black text-white bg-slate-950 px-3 py-1 rounded-lg border-2 border-slate-950"
+                class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100"
             >
                 {filteredHistory.length} Record
             </span>
         </div>
 
         {#each filteredHistory as item (item.id)}
-            <div
-                class="bg-white p-6 rounded-[2.5rem] border-2 border-slate-200 shadow-xl shadow-slate-200/40 group active:scale-[0.99] transition-all"
-            >
-                <div class="flex justify-between items-start mb-8">
-                    <div class="space-y-2 flex-grow min-w-0 mr-4">
+            <div class="simple-card group">
+                <div class="flex justify-between items-start mb-5">
+                    <div class="space-y-1.5 flex-grow min-w-0 mr-4">
                         <h4
-                            class="font-black text-slate-950 text-2xl leading-none tracking-tight truncate"
+                            class="font-bold text-slate-900 text-lg leading-tight truncate"
                         >
                             {item.customerName}
                         </h4>
                         <div class="flex items-center gap-2 flex-wrap">
                             <span
-                                class="text-[10px] font-black text-slate-500 uppercase tracking-widest"
-                                >{item.date}</span
+                                class="text-[10px] font-bold text-slate-500 font-mono"
                             >
-                            <span class="w-1.5 h-1.5 rounded-full bg-slate-300"
+                                {item.date}
+                            </span>
+                            <span class="w-1 h-1 rounded-full bg-slate-300"
                             ></span>
-                            <div
-                                class="flex items-center gap-1.5 bg-slate-100 px-2 py-1 rounded-md border border-slate-200"
+                            <span
+                                class="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200"
                             >
-                                <div
-                                    class="w-1.5 h-1.5 rounded-full bg-slate-950"
-                                ></div>
-                                <span
-                                    class="text-[9px] font-black text-slate-950 uppercase tracking-widest"
-                                >
-                                    {item.items.reduce(
-                                        (acc, curr) => acc + curr.quantity,
-                                        0,
-                                    )} Item
-                                </span>
-                            </div>
+                                {item.items.reduce(
+                                    (acc, curr) => acc + curr.quantity,
+                                    0,
+                                )} Item
+                            </span>
                         </div>
                     </div>
+
                     <div class="flex flex-col items-end gap-2 flex-none">
-                        <div
-                            class="bg-slate-50 border-2 border-slate-100 rounded-2xl px-4 py-2 text-right"
-                        >
-                            <div
-                                class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1"
-                            >
-                                Total
-                            </div>
+                        <div class="text-right">
                             <p
-                                class="font-black text-slate-950 text-xl font-mono tracking-tighter leading-none"
+                                class="font-black text-slate-900 text-lg font-mono leading-none tracking-tight"
                             >
                                 {formatCurrency(item.total)
                                     .replace("Rp", "")
@@ -163,10 +144,10 @@
                             </p>
                         </div>
                         <div
-                            class="inline-flex items-center px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border-2 shadow-sm
+                            class="inline-flex items-center px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-widest border
                             {item.status === 'completed'
-                                ? 'bg-slate-950 text-white border-slate-950'
-                                : 'bg-white text-slate-950 border-slate-950'}"
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : 'bg-slate-50 text-slate-600 border-slate-200'}"
                         >
                             {item.status}
                         </div>
@@ -174,17 +155,17 @@
                 </div>
 
                 <div
-                    class="flex flex-wrap gap-3 pt-6 border-t-2 border-dashed border-slate-100 justify-between items-center"
+                    class="flex flex-wrap gap-3 pt-4 border-t border-slate-100 justify-between items-center"
                 >
                     <div
-                        class="flex gap-2 overflow-x-auto no-scrollbar max-w-[75%] py-1"
+                        class="flex gap-2 min-w-0 flex-wrap flex-1 content-start"
                     >
                         {#each item.items as subItem}
                             <div
-                                class="flex-none bg-slate-50 px-3 py-2 rounded-xl border-2 border-slate-200 text-[10px] font-black text-slate-950 whitespace-nowrap shadow-sm"
+                                class="flex-none bg-slate-50 px-2 py-1 rounded-md border border-slate-200 text-[10px] font-bold text-slate-700 whitespace-nowrap"
                             >
                                 {subItem.type}
-                                <span class="text-slate-500 ml-1"
+                                <span class="text-slate-400 font-normal ml-0.5"
                                     >x{subItem.quantity}</span
                                 >
                             </div>
@@ -192,9 +173,9 @@
                     </div>
                     <button
                         onclick={() => handleDelete(item.id)}
-                        class="w-12 h-12 flex items-center justify-center rounded-2xl bg-white text-red-600 hover:text-red-700 hover:bg-red-50 transition-all border-2 border-slate-200 shadow-sm"
+                        class="w-10 h-10 flex-none flex items-center justify-center rounded-lg bg-white text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors border border-slate-200"
                     >
-                        <Trash2 size={22} strokeWidth={4} />
+                        <Trash2 size={18} strokeWidth={2.5} />
                     </button>
                 </div>
             </div>
@@ -202,15 +183,15 @@
 
         {#if filteredHistory.length === 0}
             <div
-                class="flex flex-col items-center justify-center py-24 text-slate-300"
+                class="flex flex-col items-center justify-center py-24 text-slate-400"
             >
                 <div
-                    class="w-20 h-20 rounded-[2.5rem] border-4 border-dashed border-slate-200 flex items-center justify-center mb-6"
+                    class="w-16 h-16 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center mb-4 bg-slate-50"
                 >
-                    <Search size={32} class="opacity-20" strokeWidth={4} />
+                    <Search size={28} class="opacity-50" strokeWidth={3} />
                 </div>
                 <p
-                    class="text-[11px] font-black uppercase tracking-[0.4em] opacity-40"
+                    class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
                 >
                     Tidak Ditemukan
                 </p>
@@ -222,13 +203,6 @@
 <style>
     :global(body) {
         background-color: #f1f5f9;
-        color: #020617;
-    }
-    .no-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
-    .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+        color: #0f172a;
     }
 </style>
