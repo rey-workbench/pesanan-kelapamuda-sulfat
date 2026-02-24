@@ -132,7 +132,7 @@
                 </Card>
             {/each}
 
-            {#if hiddenProductCount > 0}
+            {#if !showAllProducts && hiddenProductCount > 0}
                 <Button
                     variant="ghost"
                     size="sm"
@@ -141,7 +141,7 @@
                 >
                     Tampilkan {hiddenProductCount} menu lainnya ›
                 </Button>
-            {:else if showAllProducts && (cfg.settings?.products?.length || 0) > COLLAPSE_LIMIT}
+            {:else if showAllProducts && hiddenProductCount > 0}
                 <Button
                     variant="ghost"
                     size="sm"
@@ -196,7 +196,7 @@
                 </div>
             {/each}
 
-            {#if hiddenOptionCount > 0}
+            {#if !showAllOptions && hiddenOptionCount > 0}
                 <Button
                     variant="ghost"
                     size="sm"
@@ -205,7 +205,7 @@
                 >
                     Tampilkan {hiddenOptionCount} opsi lainnya ›
                 </Button>
-            {:else if showAllOptions && (cfg.settings?.options?.length || 0) > COLLAPSE_LIMIT}
+            {:else if showAllOptions && hiddenOptionCount > 0}
                 <Button
                     variant="ghost"
                     size="sm"
@@ -220,12 +220,12 @@
 </div>
 
 <!-- Compact floating save -->
-<div class="fixed bottom-20 left-0 right-0 px-5 z-40 pointer-events-none">
-    <div class="max-w-md mx-auto pointer-events-auto">
+<div class="fixed bottom-20 left-0 right-0 px-8 z-40 pointer-events-none">
+    <div class="max-w-sm mx-auto pointer-events-auto">
         <Button
             variant="emerald"
             size="md"
-            class="w-full shadow-xl"
+            class="w-full shadow-xl rounded-2xl"
             onclick={() => cfg.saveSettings()}
         >
             <Save size={16} strokeWidth={3} />
