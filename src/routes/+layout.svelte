@@ -4,6 +4,7 @@
 	import Header from "$lib/components/Header.svelte";
 	import Modal from "$lib/components/Modal.svelte";
 	import { ui } from "$lib/ui.svelte";
+	import { onMount } from "svelte";
 
 	let { data, children } = $props();
 
@@ -14,6 +15,21 @@
 			if (ui.title === "Pesan Degan") {
 				ui.title = data.settings.storeName;
 			}
+		}
+	});
+
+	onMount(async () => {
+		if ("serviceWorker" in navigator) {
+			const { registerSW } = await import("virtual:pwa-register");
+			registerSW({
+				immediate: true,
+				onRegistered(r) {
+					console.log("SW Registered:", r);
+				},
+				onRegisterError(error) {
+					console.error("SW registration error:", error);
+				},
+			});
 		}
 	});
 </script>
