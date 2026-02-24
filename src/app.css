@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #10b981;
+  --color-primary-dark: #059669;
+  --color-primary-light: #d1fae5;
+  --font-outfit: "Outfit", sans-serif;
+}
+
+@utility glass-card {
+  @apply bg-white/80 backdrop-blur-md border border-emerald-100 rounded-2xl shadow-sm p-4;
+}
+
+@utility btn-pos {
+  @apply active:scale-95 transition-transform flex items-center justify-center font-bold rounded-xl h-14 w-full text-lg;
+}
+
+@utility btn-primary {
+  @apply btn-pos bg-emerald-600 text-white shadow-md shadow-emerald-200;
+}
+
+@utility btn-outline {
+  @apply btn-pos border-2 border-emerald-600 text-emerald-600;
+}
+
+@utility input-pos {
+  @apply w-full h-12 bg-white border border-emerald-200 rounded-xl px-4 focus:ring-2 focus:ring-emerald-500 outline-none;
+}
+
+@layer base {
+  body {
+    @apply font-outfit bg-emerald-50 text-emerald-950 min-h-screen relative;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Prevent scrolling content behind navbar on mobile */
+  main {
+    @apply pb-24;
+  }
+}
+
+/* Custom animations for v4 */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(1rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-in {
+  animation: fade-in 0.4s ease-out forwards;
+}
