@@ -158,11 +158,7 @@
     <section class="space-y-3">
         <div class="flex justify-between items-center px-1">
             <SectionHeader title="Opsi Tambahan" />
-            <Button
-                variant="secondary"
-                size="sm"
-                onclick={() => cfg.addOption()}
-            >
+            <Button variant="emerald" size="sm" onclick={() => cfg.addOption()}>
                 <Plus size={14} strokeWidth={3} /> Tambah
             </Button>
         </div>
