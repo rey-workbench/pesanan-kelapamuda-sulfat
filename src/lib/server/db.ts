@@ -1,18 +1,26 @@
 import { createClient } from '@libsql/client';
-import { resolve } from 'path';
+import { env } from '$env/dynamic/private';
 
-// Gunakan file lokal database.db
-const dbPath = 'file:' + resolve('database.db');
+// Pastikan variabel lingkungan tersedia
+const url = env.TURSO_DATABASE_URL;
+const authToken = env.TURSO_AUTH_TOKEN;
+
+if (!url) {
+    throw new Error('TURSO_DATABASE_URL tidak ditemukan di environment variables');
+}
+
 const client = createClient({
-    url: dbPath,
+    url: url,
+    authToken: authToken,
 });
 
 let initialized = false;
 
-// Inisialisasi Tabel secara asinkron (akan dipanggil saat pertama kali dibutuhkan)
+// Inisialisasi Tabel secara asinkron
 export async function initDB() {
     if (initialized) return;
 
+    // Turso / LibSQL menggunakan dialek SQLite
     await client.execute(`
         CREATE TABLE IF NOT EXISTS settings (
             id TEXT PRIMARY KEY,
