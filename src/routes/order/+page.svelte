@@ -77,12 +77,13 @@
     }
 
     function triggerOrder() {
-        if (cart.length === 0 || cash === null || cash < total) return;
+        if (cart.length === 0 || (cash !== null && cash !== 0 && cash < total))
+            return;
         showConfirmModal = true;
     }
 
     async function submitOrder() {
-        if (cart.length === 0 || cash === null) return;
+        if (cart.length === 0) return;
 
         ui.showLoading(
             "Memproses Pesanan",
@@ -390,8 +391,7 @@
                 onclick={triggerOrder}
                 disabled={ui.loading.show ||
                     cart.length === 0 ||
-                    !cash ||
-                    cash < total}
+                    (cash !== null && cash !== 0 && cash < total)}
                 class="w-full h-16 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl font-bold text-sm shadow-lg active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-3 uppercase tracking-widest mt-4"
             >
                 {ui.loading.show ? "Memproses..." : "Simpan Pesanan"}
