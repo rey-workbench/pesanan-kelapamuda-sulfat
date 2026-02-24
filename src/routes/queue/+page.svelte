@@ -4,6 +4,7 @@
     import { invalidateAll } from "$app/navigation";
     import { formatCurrency, apiCall } from "$lib/utils";
     import { ui } from "$lib/ui.svelte";
+    import Modal from "$lib/components/Modal.svelte";
 
     let { data } = $props();
 
@@ -28,8 +29,19 @@
     async function handleComplete(id: number | undefined) {
         if (!id) return;
 
-        await apiCall("updateStatus", { id, status: "completed" });
-        await invalidateAll();
+        ui.showLoading(
+            "Menyelesaikan Pesanan",
+            "Sedang memperbarui status pesanan...",
+        );
+        try {
+            await apiCall("updateStatus", { id, status: "completed" });
+            await invalidateAll();
+        } finally {
+            // Beri sedikit delay agar tidak terlalu berkedip
+            setTimeout(() => {
+                ui.hideLoading();
+            }, 500);
+        }
     }
 </script>
 

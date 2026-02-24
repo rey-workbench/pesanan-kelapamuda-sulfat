@@ -2,6 +2,7 @@
 	import "../app.css";
 	import BottomNav from "$lib/components/BottomNav.svelte";
 	import Header from "$lib/components/Header.svelte";
+	import Modal from "$lib/components/Modal.svelte";
 	import { ui } from "$lib/ui.svelte";
 
 	let { data, children } = $props();
@@ -36,6 +37,14 @@
 
 	<BottomNav />
 </div>
+
+<!-- Global Loading Modal -->
+<Modal
+	show={ui.loading.show}
+	title={ui.loading.title}
+	message={ui.loading.message}
+	type="loading"
+/>
 
 <style>
 	:global(body) {

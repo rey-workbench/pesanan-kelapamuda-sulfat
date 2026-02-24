@@ -70,13 +70,25 @@
             options: editedOptions.filter((o) => o.trim() !== ""),
         };
 
+        // Show global loading modal
+        ui.showLoading("Menyimpan", "Sedang menyimpan konfigurasi terbaru...");
+
         try {
             await apiCall("saveSettings", newSettings);
             await invalidateAll();
-            showModal("Berhasil", "Pengaturan berhasil disimpan!", "info", () =>
-                goto("/"),
-            );
+
+            // Sedikit delay agar transisi tidak terlalu kaget
+            setTimeout(() => {
+                ui.hideLoading();
+                showModal(
+                    "Berhasil",
+                    "Pengaturan berhasil disimpan!",
+                    "info",
+                    () => goto("/"),
+                );
+            }, 500);
         } catch (error) {
+            ui.hideLoading();
             console.error("Gagal menyimpan pengaturan:", error);
             showModal(
                 "Terjadi Kesalahan",

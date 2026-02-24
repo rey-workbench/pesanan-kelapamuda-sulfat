@@ -5,6 +5,13 @@ export const ui = $state({
     completed: null as number | null,
     showBack: false,
 
+    // Global Loading state
+    loading: {
+        show: false,
+        title: '',
+        message: ''
+    },
+
     // Helper to reset and set new values
     setPage(config: {
         title?: string,
@@ -18,5 +25,14 @@ export const ui = $state({
         this.pending = config.pending ?? null;
         this.completed = config.completed ?? null;
         this.showBack = config.showBack ?? false;
+    },
+
+    // Helper to show/hide loading
+    showLoading(title: string = 'Mohon Tunggu', message: string = 'Sedang memproses data...') {
+        this.loading = { show: true, title, message };
+    },
+
+    hideLoading() {
+        this.loading.show = false;
     }
 });

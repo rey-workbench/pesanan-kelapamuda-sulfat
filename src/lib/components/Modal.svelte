@@ -7,7 +7,7 @@
         message: string;
         confirmText?: string;
         cancelText?: string;
-        type?: "confirm" | "info" | "danger";
+        type?: "confirm" | "info" | "danger" | "loading";
         onConfirm?: () => void;
         onCancel?: () => void;
     }
@@ -52,7 +52,16 @@
             in:scale={{ duration: 150, start: 0.95 }}
             out:scale={{ duration: 150, start: 0.95 }}
         >
-            <div class="p-6 text-center space-y-3 pt-8">
+            <div
+                class={`p-6 text-center space-y-4 pt-8 ${type === "loading" ? "pb-8" : ""}`}
+            >
+                {#if type === "loading"}
+                    <div class="flex justify-center mb-4">
+                        <div
+                            class="w-12 h-12 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin"
+                        ></div>
+                    </div>
+                {/if}
                 <h3
                     class="text-xl font-bold text-slate-900 tracking-tight leading-none"
                 >
@@ -63,37 +72,39 @@
                 </p>
             </div>
 
-            <div
-                class="grid gap-px bg-slate-200 border-t border-slate-200 mt-2 {type ===
-                'info'
-                    ? 'grid-cols-1'
-                    : 'grid-cols-2'}"
-            >
-                {#if type !== "info"}
-                    <button
-                        onclick={handleCancel}
-                        class="p-4 bg-white text-slate-500 font-bold text-sm transition-colors hover:bg-slate-50 active:bg-slate-100 uppercase tracking-widest"
-                    >
-                        {cancelText}
-                    </button>
-                    <button
-                        onclick={handleConfirm}
-                        class="p-4 bg-white font-bold text-sm transition-colors uppercase tracking-widest
-                        {type === 'danger'
-                            ? 'text-red-600 hover:bg-red-50 active:bg-red-100'
-                            : 'text-emerald-600 hover:bg-emerald-50 active:bg-emerald-100'}"
-                    >
-                        {confirmText}
-                    </button>
-                {:else}
-                    <button
-                        onclick={handleConfirm}
-                        class="p-4 bg-white font-bold text-sm text-emerald-600 hover:bg-emerald-50 active:bg-emerald-100 transition-colors uppercase tracking-widest w-full"
-                    >
-                        {confirmText}
-                    </button>
-                {/if}
-            </div>
+            {#if type !== "loading"}
+                <div
+                    class="grid gap-px bg-slate-200 border-t border-slate-200 mt-2 {type ===
+                    'info'
+                        ? 'grid-cols-1'
+                        : 'grid-cols-2'}"
+                >
+                    {#if type !== "info"}
+                        <button
+                            onclick={handleCancel}
+                            class="p-4 bg-white text-slate-500 font-bold text-sm transition-colors hover:bg-slate-50 active:bg-slate-100 uppercase tracking-widest"
+                        >
+                            {cancelText}
+                        </button>
+                        <button
+                            onclick={handleConfirm}
+                            class="p-4 bg-white font-bold text-sm transition-colors uppercase tracking-widest
+                            {type === 'danger'
+                                ? 'text-red-600 hover:bg-red-50 active:bg-red-100'
+                                : 'text-emerald-600 hover:bg-emerald-50 active:bg-emerald-100'}"
+                        >
+                            {confirmText}
+                        </button>
+                    {:else}
+                        <button
+                            onclick={handleConfirm}
+                            class="p-4 bg-white font-bold text-sm text-emerald-600 hover:bg-emerald-50 active:bg-emerald-100 transition-colors uppercase tracking-widest w-full"
+                        >
+                            {confirmText}
+                        </button>
+                    {/if}
+                </div>
+            {/if}
         </div>
     </div>
 {/if}

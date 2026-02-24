@@ -40,9 +40,19 @@
     async function confirmDelete() {
         if (!itemToDelete) return;
 
-        await apiCall("deleteOrder", { id: itemToDelete });
-        await invalidateAll();
-        itemToDelete = undefined;
+        ui.showLoading(
+            "Menghapus Pesanan",
+            "Sedang menghapus data dari server...",
+        );
+        try {
+            await apiCall("deleteOrder", { id: itemToDelete });
+            await invalidateAll();
+        } finally {
+            itemToDelete = undefined;
+            setTimeout(() => {
+                ui.hideLoading();
+            }, 500);
+        }
     }
 
     function exportData() {
@@ -216,11 +226,10 @@
 
 <Modal
     bind:show={showDeleteModal}
-    title="Hapus Data"
-    message="Apakah Anda yakin ingin menghapus data transaksi ini secara permanen?"
-    confirmText="Hapus"
-    cancelText="Batal"
+    title="Hapus Pesanan?"
+    message="Tindakan ini tidak dapat dibatalkan. Pesanan akan dihapus permanen."
     type="danger"
+    confirmText="Hapus"
     onConfirm={confirmDelete}
 />
 

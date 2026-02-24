@@ -21,7 +21,6 @@
     let customerName = $state("");
     let cart = $state<OrderItem[]>([]);
     let cash = $state<number | null>(null);
-    let isSubmitting = $state(false);
     let showConfirmModal = $state(false);
 
     let total = $derived(
@@ -86,7 +85,10 @@
     async function submitOrder() {
         if (!customerName || cart.length === 0 || cash === null) return;
 
-        isSubmitting = true;
+        ui.showLoading(
+            "Memproses Pesanan",
+            "Mohon tunggu sebentar, sedang menyimpan data ke server...",
+        );
 
         try {
             await apiCall("addOrder", {
@@ -102,9 +104,15 @@
             cart = [];
             cash = null;
             await invalidateAll();
-            goto("/queue");
-        } finally {
-            isSubmitting = false;
+
+            // Sedikit delay agar user sempat melihat modal "Berhasil" atau transisinya halus
+            setTimeout(() => {
+                ui.hideLoading();
+                goto("/queue");
+            }, 500);
+        } catch (e) {
+            ui.hideLoading();
+            console.error(e);
         }
     }
 </script>
@@ -360,15 +368,15 @@
 
             <button
                 onclick={triggerOrder}
-                disabled={isSubmitting ||
+                disabled={ui.loading.show ||
                     !customerName ||
                     cart.length === 0 ||
                     !cash ||
                     cash < total}
                 class="w-full h-16 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl font-bold text-sm shadow-lg active:scale-[0.98] transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-3 uppercase tracking-widest mt-4"
             >
-                {isSubmitting ? "Memproses..." : "Simpan Pesanan"}
-                {#if !isSubmitting}
+                {ui.loading.show ? "Memproses..." : "Simpan Pesanan"}
+                {#if !ui.loading.show}
                     <ChevronRight size={20} strokeWidth={3} />
                 {/if}
             </button>
