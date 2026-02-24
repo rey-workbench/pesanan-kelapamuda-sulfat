@@ -11,6 +11,27 @@
   @apply bg-white border border-slate-200 rounded-2xl p-4;
 }
 
+@utility container-sm {
+  @apply max-w-md mx-auto px-5;
+}
+
+@utility badge {
+  @apply inline-flex items-center text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg border;
+}
+
+@utility badge-slate {
+  @apply badge bg-slate-100 text-slate-700 border-slate-200;
+}
+
+@utility badge-emerald {
+  @apply badge bg-emerald-50 text-emerald-700 border-emerald-200;
+}
+
+@utility badge-blue {
+  @apply badge bg-blue-50 text-blue-700 border-blue-200;
+}
+
+
 @utility simple-nav {
   @apply bg-white border-b border-slate-200;
 }

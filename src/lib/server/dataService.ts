@@ -61,42 +61,71 @@ export const dataService = {
             args: [today]
         });
 
-        const data = res.rows.map(row => ({
-            id: row.id as number,
-            customerName: row.customerName as string,
-            items: JSON.parse(row.items as string),
-            total: row.total as number,
-            cash: row.cash as number,
-            change: row.change as number,
-            date: row.date as string,
-            status: row.status as any,
-            createdAt: row.createdAt as number
-        }));
+        const data = res.rows.map(row => {
+            const items = (() => {
+                try {
+                    const parsed = JSON.parse(row.items as string || '[]');
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch { return []; }
+            })();
+            return {
+                id: row.id as number,
+                customerName: (row.customerName as string) || 'Pelanggan',
+                items: items.map((it: any) => ({
+                    type: it.type,
+                    quantity: it.quantity,
+                    price: it.price,
+                    options: Array.isArray(it.options) ? it.options
+                        : it.option ? [it.option] : [],
+                })),
+                total: (row.total as number) || 0,
+                cash: (row.cash as number) || 0,
+                change: (row.change as number) || 0,
+                date: (row.date as string) || '',
+                status: (row.status as any) || 'pending',
+                catatan: (row.catatan as string) || '',
+                createdAt: (row.createdAt as number) || Date.now(),
+            };
+        });
 
-        // Update cache
         cachedQueue = { data, timestamp: now };
         return data;
     },
 
     async getOrders(): Promise<Order[]> {
         const res = await client.execute('SELECT * FROM orders ORDER BY createdAt DESC');
-        return res.rows.map(row => ({
-            id: row.id as number,
-            customerName: row.customerName as string,
-            items: JSON.parse(row.items as string),
-            total: row.total as number,
-            cash: row.cash as number,
-            change: row.change as number,
-            date: row.date as string,
-            status: row.status as any,
-            createdAt: row.createdAt as number
-        }));
+        return res.rows.map(row => {
+            const items = (() => {
+                try {
+                    const parsed = JSON.parse(row.items as string || '[]');
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch { return []; }
+            })();
+            return {
+                id: row.id as number,
+                customerName: (row.customerName as string) || 'Pelanggan',
+                items: items.map((it: any) => ({
+                    type: it.type,
+                    quantity: it.quantity,
+                    price: it.price,
+                    options: Array.isArray(it.options) ? it.options
+                        : it.option ? [it.option] : [],
+                })),
+                total: (row.total as number) || 0,
+                cash: (row.cash as number) || 0,
+                change: (row.change as number) || 0,
+                date: (row.date as string) || '',
+                status: (row.status as any) || 'pending',
+                catatan: (row.catatan as string) || '',
+                createdAt: (row.createdAt as number) || Date.now(),
+            };
+        });
     },
 
     async addOrder(order: Omit<Order, 'id' | 'createdAt' | 'status'>) {
         const res = await client.execute({
-            sql: `INSERT INTO orders (customerName, items, total, cash, change, date, createdAt)
-                  VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            sql: `INSERT INTO orders (customerName, items, total, cash, \`change\`, date, catatan, createdAt)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             args: [
                 order.customerName,
                 JSON.stringify(order.items),
@@ -104,11 +133,11 @@ export const dataService = {
                 order.cash,
                 order.change,
                 order.date,
+                order.catatan || '',
                 Date.now()
             ]
         });
 
-        // Invalidate queue cache
         cachedQueue = null;
         return res;
     },

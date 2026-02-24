@@ -1,294 +1,203 @@
 <script lang="ts">
-    import type { Order } from "$lib/models";
     import {
-        Download,
-        Trash2,
-        Search,
         Calendar as CalendarIcon,
+        Download,
+        History,
+        TrendingUp,
+        ShoppingBag,
+        X,
     } from "lucide-svelte";
-    import * as XLSX from "xlsx";
-    import Modal from "$lib/components/Modal.svelte";
-    import { invalidateAll } from "$app/navigation";
-    import { formatCurrency, apiCall } from "$lib/utils";
-    import { ui } from "$lib/ui.svelte";
-    import CalendarPicker from "$lib/components/CalendarPicker.svelte";
+    import { formatCurrency } from "$lib/utils";
+    import { ui } from "$lib/state/ui.svelte";
+    import Button from "$lib/components/ui/Button.svelte";
+    import Card from "$lib/components/ui/Card.svelte";
+    import StatusBadge from "$lib/components/shared/StatusBadge.svelte";
+    import CalendarPicker from "$lib/components/shared/CalendarPicker.svelte";
+    import SectionHeader from "$lib/components/shared/SectionHeader.svelte";
+    import { ReportsState } from "$lib/state/reports.svelte";
 
     let { data } = $props();
 
-    // Use server data
-    let history = $derived(data.history);
-    let searchTerm = $state("");
+    const state = new ReportsState({
+        orders: data.history || [],
+        settings: data.settings!,
+    });
 
-    let filterDate = $state("");
-    let showCalendar = $state(false);
     $effect(() => {
-        ui.setPage({
-            title: data.settings?.storeName,
-            subtitle: "Riwayat Transaksi",
-            pending: (data.queue || []).filter(
-                (q: any) => q.status === "pending",
-            ).length,
-            completed: (data.queue || []).filter(
-                (q: any) => q.status === "completed",
-            ).length,
-            showBack: false,
+        state.updateData({
+            orders: data.history || [],
+            settings: data.settings!,
         });
     });
 
-    let showDeleteModal = $state(false);
-    let itemToDelete = $state<number | undefined>(undefined);
-
-    function handleDelete(id: number | undefined) {
-        if (!id) return;
-        itemToDelete = id;
-        showDeleteModal = true;
-    }
-
-    async function confirmDelete() {
-        if (!itemToDelete) return;
-
-        ui.showLoading(
-            "Menghapus Pesanan",
-            "Sedang menghapus data dari server...",
-        );
-        try {
-            await apiCall("deleteOrder", { id: itemToDelete });
-            await invalidateAll();
-        } finally {
-            itemToDelete = undefined;
-            setTimeout(() => {
-                ui.hideLoading();
-            }, 500);
-        }
-    }
-
-    function exportData() {
-        const rows = history.flatMap((o) =>
-            o.items.map((item) => ({
-                Tanggal: o.date,
-                Nama: o.customerName,
-                Produk: item.type,
-                Opsi: item.option,
-                Jumlah: item.quantity,
-                Harga: item.price,
-                Subtotal: item.price * item.quantity,
-                "Total Transaksi": o.total,
-                Status:
-                    o.status === "pending"
-                        ? "Menu Dibuat"
-                        : o.status === "completed"
-                          ? "Siap Ambil"
-                          : o.status === "picked_up"
-                            ? "Sudah Diambil"
-                            : o.status,
-            })),
-        );
-        const ws = XLSX.utils.json_to_sheet(rows);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "Laporan");
-        XLSX.writeFile(
-            wb,
-            `laporan-${new Date().toISOString().split("T")[0]}.xlsx`,
-        );
-    }
-
-    const filteredHistory = $derived(
-        history
-            .filter((o) => {
-                const matchSearch =
-                    o.customerName
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
-                    o.items.some((i) =>
-                        i.type.toLowerCase().includes(searchTerm.toLowerCase()),
-                    );
-                const matchDate = filterDate ? o.date === filterDate : true;
-                return matchSearch && matchDate;
-            })
-            .sort((a, b) => b.createdAt - a.createdAt),
-    );
-
-    function getStatusLabel(status: string) {
-        if (status === "pending") return "Dibuat";
-        if (status === "completed") return "Siap Ambil";
-        if (status === "picked_up") return "Selesai";
-        return status;
-    }
-
-    function getStatusClasses(status: string) {
-        if (status === "picked_up")
-            return "bg-emerald-50 text-emerald-700 border-emerald-200";
-        if (status === "completed")
-            return "bg-blue-50 text-blue-700 border-blue-200";
-        return "bg-slate-50 text-slate-600 border-slate-200";
-    }
+    $effect(() => {
+        ui.setPage({
+            title: state.data?.settings?.storeName || "Laporan",
+            subtitle: "Penjualan",
+            showBack: false,
+        });
+    });
 </script>
 
-<div class="px-5 pb-32 space-y-8 mt-4 max-w-md mx-auto">
-    <!-- Controls -->
-    <div class="flex flex-col gap-4">
-        <div class="flex gap-2">
-            <div class="relative group grow min-w-0">
-                <Search class="input-pos-icon" size={20} strokeWidth={2.5} />
-                <input
-                    type="text"
-                    bind:value={searchTerm}
-                    placeholder="Cari pelanggan atau menu..."
-                    class="input-pos pl-11"
-                />
-            </div>
-
-            <button
-                onclick={() => (showCalendar = true)}
-                class="flex-none rounded-xl border-2 transition-all flex items-center justify-center gap-2 h-14 active:scale-[0.98] {filterDate
-                    ? 'px-3 bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-200'
-                    : 'w-14 bg-white border-slate-200 text-slate-500 hover:border-emerald-300'}"
-            >
-                <CalendarIcon size={20} strokeWidth={2.5} />
-                {#if filterDate}
-                    <span class="text-xs font-bold font-mono tracking-tighter"
-                        >{filterDate.split("-").reverse().join("/")}</span
-                    >
-                {/if}
-            </button>
-        </div>
-
-        <button
-            onclick={exportData}
-            class="btn-secondary h-12 text-[10px] tracking-widest uppercase flex gap-2"
+<div class="container-sm pb-28 space-y-5 mt-3 animate-in">
+    <!-- Single-row controls -->
+    <div class="flex gap-2 items-center">
+        <!-- Filter chip -->
+        <Button
+            variant="unstyled"
+            size="sm"
+            class="flex-1 flex items-center gap-2 h-11 bg-white rounded-xl px-3 border border-slate-200 shadow-sm text-left min-w-0"
+            onclick={() => (state.showCalendar = true)}
         >
-            <Download size={18} strokeWidth={3} /> EXPORT LAPORAN
-        </button>
+            <History
+                size={15}
+                strokeWidth={2.5}
+                class="text-slate-400 shrink-0"
+            />
+            <span class="text-xs font-bold text-slate-700 truncate">
+                {state.filterDate
+                    ? state.filterDate.split("-").reverse().join("/")
+                    : "Semua Tanggal"}
+            </span>
+            {#if state.filterDate}
+                <Button
+                    variant="unstyled"
+                    size="sm"
+                    class="ml-auto w-5 h-5 p-0 flex-none flex items-center justify-center rounded-full bg-emerald-100 text-emerald-700"
+                    onclick={(e) => {
+                        e.stopPropagation();
+                        state.filterDate = "";
+                    }}
+                >
+                    <X size={10} strokeWidth={3} />
+                </Button>
+            {/if}
+        </Button>
+
+        <!-- Calendar trigger -->
+        <Button
+            variant={state.filterDate ? "emerald" : "secondary"}
+            size="sm"
+            class="flex-none w-11 h-11 p-0 rounded-xl"
+            onclick={() => (state.showCalendar = true)}
+        >
+            <CalendarIcon size={18} strokeWidth={2.5} />
+        </Button>
+
+        <!-- Export -->
+        <Button
+            variant="slate"
+            size="sm"
+            class="flex-none h-11 px-3 rounded-xl"
+            onclick={() => state.exportToExcel()}
+            disabled={state.filteredOrders.length === 0}
+        >
+            <Download size={16} strokeWidth={2.5} />
+            <span class="hidden sm:inline text-xs">Export</span>
+        </Button>
     </div>
 
-    <!-- History List -->
-    <div class="space-y-4">
-        <div class="flex items-center justify-between px-1">
-            <h3
-                class="text-[10px] font-bold text-slate-500 uppercase tracking-widest"
-            >
-                Semua Transaksi
-            </h3>
-            <span
-                class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-100"
-            >
-                {filteredHistory.length} Record
-            </span>
-        </div>
+    <!-- Summary -->
+    <div class="grid grid-cols-2 gap-2.5">
+        <Card variant="premium" padding="sm" class="flex flex-col gap-1.5">
+            <div class="flex items-center gap-1.5 text-emerald-600">
+                <TrendingUp size={12} strokeWidth={3} />
+                <span class="text-[9px] font-black uppercase tracking-widest"
+                    >Omzet</span
+                >
+            </div>
+            <div class="text-base font-black font-mono text-slate-900 truncate">
+                {formatCurrency(state.totalRevenue).replace("Rp", "").trim()}
+            </div>
+        </Card>
+        <Card variant="premium" padding="sm" class="flex flex-col gap-1.5">
+            <div class="flex items-center gap-1.5 text-blue-600">
+                <ShoppingBag size={12} strokeWidth={3} />
+                <span class="text-[9px] font-black uppercase tracking-widest"
+                    >Terjual</span
+                >
+            </div>
+            <div class="text-base font-black font-mono text-slate-900">
+                {state.totalItems}
+                <span class="text-[9px] font-bold text-slate-400">Degan</span>
+            </div>
+        </Card>
+    </div>
 
-        {#each filteredHistory as item (item.id)}
-            <div class="simple-card group">
-                <div class="flex justify-between items-start mb-5">
-                    <div class="space-y-1.5 grow min-w-0 mr-4">
-                        <h4
-                            class="font-bold text-slate-900 text-lg leading-tight truncate"
-                        >
-                            {item.customerName}
-                        </h4>
-                        <div class="flex items-center gap-2 flex-wrap">
+    <!-- Order list -->
+    <section class="space-y-2">
+        <SectionHeader title="Pesanan ({state.filteredOrders.length})" />
+        <div class="space-y-2">
+            {#each state.filteredOrders as item (item.id)}
+                <div
+                    class="bg-white rounded-xl border border-slate-200 px-4 py-3 flex flex-col gap-2"
+                >
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
                             <span
-                                class="text-[10px] font-bold text-slate-500 font-mono"
+                                class="text-[10px] font-black text-slate-400 font-mono"
+                                >#{item.id}</span
                             >
-                                {item.date}
-                            </span>
-                            <span class="w-1 h-1 rounded-full bg-slate-300"
-                            ></span>
-                            <span
-                                class="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200"
-                            >
+                            <span class="badge-slate shrink-0">
                                 {item.items.reduce(
-                                    (acc, curr) => acc + curr.quantity,
+                                    (a: number, c: { quantity: number }) =>
+                                        a + c.quantity,
                                     0,
                                 )} Item
                             </span>
                         </div>
+                        <StatusBadge status={item.status} />
                     </div>
-
-                    <div class="flex flex-col items-end gap-2 flex-none">
-                        <div class="text-right">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="min-w-0">
                             <p
-                                class="font-black text-slate-900 text-lg font-mono leading-none tracking-tight"
+                                class="font-bold text-slate-900 text-sm truncate leading-tight"
                             >
-                                {formatCurrency(item.total)
-                                    .replace("Rp", "")
-                                    .trim()}
+                                {item.customerName}
+                            </p>
+                            <p
+                                class="text-[10px] text-slate-400 font-medium mt-0.5"
+                            >
+                                {item.date}
                             </p>
                         </div>
-                        <div
-                            class="inline-flex items-center px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-widest border {getStatusClasses(
-                                item.status,
-                            )}"
+                        <p
+                            class="text-sm font-black font-mono text-emerald-600 shrink-0"
                         >
-                            {getStatusLabel(item.status)}
-                        </div>
+                            {formatCurrency(item.total)
+                                .replace("Rp", "")
+                                .trim()}
+                        </p>
                     </div>
+                    {#if item.catatan}
+                        <p
+                            class="text-[10px] text-amber-800 italic bg-amber-50 rounded-lg px-2.5 py-1.5 border border-amber-100"
+                        >
+                            <span class="font-black not-italic opacity-60"
+                                >Note:
+                            </span>{item.catatan}
+                        </p>
+                    {/if}
                 </div>
-
+            {:else}
                 <div
-                    class="flex flex-wrap gap-3 pt-4 border-t border-slate-100 justify-between items-center"
+                    class="py-16 text-center opacity-40 flex flex-col items-center gap-3"
                 >
-                    <div
-                        class="flex gap-2 min-w-0 flex-wrap flex-1 content-start"
+                    <History size={28} class="opacity-50" />
+                    <p
+                        class="text-[10px] font-bold uppercase tracking-widest text-slate-500"
                     >
-                        {#each item.items as subItem}
-                            <div
-                                class="flex-none bg-slate-50 px-2 py-1 rounded-md border border-slate-200 text-[10px] font-bold text-slate-700 whitespace-nowrap"
-                            >
-                                {subItem.type}
-                                <span class="text-slate-400 font-normal ml-0.5"
-                                    >x{subItem.quantity}</span
-                                >
-                            </div>
-                        {/each}
-                    </div>
-                    <button
-                        onclick={() => handleDelete(item.id)}
-                        class="w-10 h-10 flex-none flex items-center justify-center rounded-lg bg-white text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors border border-slate-200"
-                    >
-                        <Trash2 size={18} strokeWidth={2.5} />
-                    </button>
+                        Tidak Ada Riwayat
+                    </p>
                 </div>
-            </div>
-        {/each}
-
-        {#if filteredHistory.length === 0}
-            <div
-                class="flex flex-col items-center justify-center py-24 text-slate-400"
-            >
-                <div
-                    class="w-16 h-16 rounded-2xl border-2 border-dashed border-slate-300 flex items-center justify-center mb-4 bg-slate-50"
-                >
-                    <Search size={28} class="opacity-50" strokeWidth={3} />
-                </div>
-                <p
-                    class="text-[10px] font-bold uppercase tracking-widest text-slate-400"
-                >
-                    Tidak Ditemukan
-                </p>
-            </div>
-        {/if}
-    </div>
+            {/each}
+        </div>
+    </section>
 </div>
 
-<Modal
-    bind:show={showDeleteModal}
-    title="Hapus Pesanan?"
-    message="Tindakan ini tidak dapat dibatalkan. Pesanan akan dihapus permanen."
-    type="danger"
-    confirmText="Hapus"
-    onConfirm={confirmDelete}
-/>
-
 <CalendarPicker
-    bind:show={showCalendar}
-    value={filterDate}
-    onClose={() => (showCalendar = false)}
-    onSelect={(d) => (filterDate = d)}
+    bind:show={state.showCalendar}
+    bind:value={state.filterDate}
+    onSelect={(d) => (state.filterDate = d)}
+    onClose={() => (state.showCalendar = false)}
 />
-
-<style>
-    :global(body) {
-        background-color: #f1f5f9;
-        color: #0f172a;
-    }
-</style>
