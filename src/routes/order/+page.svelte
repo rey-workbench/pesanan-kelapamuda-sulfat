@@ -113,7 +113,6 @@
             // Sedikit delay agar user sempat melihat modal "Berhasil" atau transisinya halus
             setTimeout(() => {
                 ui.hideLoading();
-                goto("/queue");
             }, 500);
         } catch (e) {
             ui.hideLoading();

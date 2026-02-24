@@ -1,11 +1,17 @@
 <script lang="ts">
     import type { Order } from "$lib/models";
-    import { Download, Trash2, Search } from "lucide-svelte";
+    import {
+        Download,
+        Trash2,
+        Search,
+        Calendar as CalendarIcon,
+    } from "lucide-svelte";
     import * as XLSX from "xlsx";
     import Modal from "$lib/components/Modal.svelte";
     import { invalidateAll } from "$app/navigation";
     import { formatCurrency, apiCall } from "$lib/utils";
     import { ui } from "$lib/ui.svelte";
+    import CalendarPicker from "$lib/components/CalendarPicker.svelte";
 
     let { data } = $props();
 
@@ -13,7 +19,8 @@
     let history = $derived(data.history);
     let searchTerm = $state("");
 
-    // Sync Header
+    let filterDate = $state("");
+    let showCalendar = $state(false);
     $effect(() => {
         ui.setPage({
             title: data.settings?.storeName,
@@ -87,15 +94,17 @@
 
     const filteredHistory = $derived(
         history
-            .filter(
-                (o) =>
+            .filter((o) => {
+                const matchSearch =
                     o.customerName
                         .toLowerCase()
                         .includes(searchTerm.toLowerCase()) ||
                     o.items.some((i) =>
                         i.type.toLowerCase().includes(searchTerm.toLowerCase()),
-                    ),
-            )
+                    );
+                const matchDate = filterDate ? o.date === filterDate : true;
+                return matchSearch && matchDate;
+            })
             .sort((a, b) => b.createdAt - a.createdAt),
     );
 
@@ -118,14 +127,30 @@
 <div class="px-5 pb-32 space-y-8 mt-4 max-w-md mx-auto">
     <!-- Controls -->
     <div class="flex flex-col gap-4">
-        <div class="relative group">
-            <Search class="input-pos-icon" size={20} strokeWidth={2.5} />
-            <input
-                type="text"
-                bind:value={searchTerm}
-                placeholder="Cari pelanggan atau menu..."
-                class="input-pos pl-11"
-            />
+        <div class="flex gap-2">
+            <div class="relative group grow min-w-0">
+                <Search class="input-pos-icon" size={20} strokeWidth={2.5} />
+                <input
+                    type="text"
+                    bind:value={searchTerm}
+                    placeholder="Cari pelanggan atau menu..."
+                    class="input-pos pl-11"
+                />
+            </div>
+
+            <button
+                onclick={() => (showCalendar = true)}
+                class="flex-none rounded-xl border-2 transition-all flex items-center justify-center gap-2 h-14 active:scale-[0.98] {filterDate
+                    ? 'px-3 bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-200'
+                    : 'w-14 bg-white border-slate-200 text-slate-500 hover:border-emerald-300'}"
+            >
+                <CalendarIcon size={20} strokeWidth={2.5} />
+                {#if filterDate}
+                    <span class="text-xs font-bold font-mono tracking-tighter"
+                        >{filterDate.split("-").reverse().join("/")}</span
+                    >
+                {/if}
+            </button>
         </div>
 
         <button
@@ -252,6 +277,13 @@
     type="danger"
     confirmText="Hapus"
     onConfirm={confirmDelete}
+/>
+
+<CalendarPicker
+    bind:show={showCalendar}
+    value={filterDate}
+    onClose={() => (showCalendar = false)}
+    onSelect={(d) => (filterDate = d)}
 />
 
 <style>
