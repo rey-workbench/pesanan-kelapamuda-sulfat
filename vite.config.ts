@@ -35,6 +35,14 @@ export default defineConfig({
                         purpose: 'maskable'
                     }
                 ]
+            },
+            workbox: {
+                globPatterns: ['**/*.{js,css,html,ico,png,svg}']
+            },
+            devOptions: {
+                enabled: true,
+                suppressWarnings: true,
+                type: 'module',
             }
         })
     ]
