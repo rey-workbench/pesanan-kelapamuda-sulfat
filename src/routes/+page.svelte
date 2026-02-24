@@ -2,7 +2,6 @@
     import { onMount } from "svelte";
     import { scale } from "svelte/transition";
     import { goto } from "$app/navigation";
-    import { ShoppingBag } from "lucide-svelte";
     import { ui } from "$lib/ui.svelte";
 
     onMount(() => {
@@ -26,12 +25,13 @@
     <!-- Pure Icon Splash -->
     <div
         in:scale={{ duration: 1000, start: 0.8, opacity: 0 }}
-        class="w-32 h-32 bg-emerald-600 rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-emerald-200 relative"
+        class="w-full h-full flex items-center justify-center relative"
     >
-        <div
-            class="absolute inset-0 bg-emerald-400 rounded-[2.5rem] animate-ping opacity-20"
-        ></div>
-        <ShoppingBag size={64} class="text-white" strokeWidth={1.5} />
+        <img
+            src="/icon-512.png"
+            alt="Logo Es Kelapa Muda Sulfat"
+            class="w-full h-full object-contain drop-shadow-2xl"
+        />
     </div>
 </div>
 

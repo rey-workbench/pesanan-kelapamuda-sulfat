@@ -11,8 +11,8 @@ export default defineConfig({
             registerType: 'autoUpdate',
             injectRegister: 'auto',
             manifest: {
-                name: 'Pesan Degan',
-                short_name: 'Degan',
+                name: 'Es Kelapa Muda Sulfat',
+                short_name: 'Sulfat',
                 description: 'Aplikasi Pemesanan Kelapa Muda Sulfat',
                 theme_color: '#10b981',
                 background_color: '#f8fafc',
