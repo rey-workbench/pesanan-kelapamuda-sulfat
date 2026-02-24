@@ -38,6 +38,7 @@ export async function initDB() {
             change INTEGER NOT NULL,
             date TEXT NOT NULL,
             status TEXT DEFAULT 'pending',
+            catatan TEXT,
             createdAt INTEGER NOT NULL
         );
     `);

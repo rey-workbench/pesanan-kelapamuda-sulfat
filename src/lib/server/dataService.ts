@@ -2,10 +2,12 @@ import client, { initDB } from './db';
 import type { Order, AppSettings } from '../models';
 import { DEFAULT_SETTINGS } from '../models';
 
-// In-memory cache
-let cachedSettings: AppSettings | null = null;
-let cachedQueue: { data: Order[], timestamp: number } | null = null;
-const QUEUE_CACHE_TTL = 5000; // 5 seconds cache for queue
+// ── In-memory server-side cache ───────────────────────────────────────────────
+let cachedSettings: { data: AppSettings; timestamp: number } | null = null;
+let cachedQueue: { data: Order[]; timestamp: number } | null = null;
+
+const SETTINGS_CACHE_TTL = 5 * 60 * 1000;  // 5 minutes — settings rarely change
+const QUEUE_CACHE_TTL = 5 * 1000;       // 5 seconds — queue refreshes on action
 
 export const dataService = {
     async init() {
@@ -13,16 +15,19 @@ export const dataService = {
     },
 
     async getSettings(): Promise<AppSettings> {
-        // Return from cache if available
-        if (cachedSettings) return cachedSettings;
+        const now = Date.now();
+        if (cachedSettings && (now - cachedSettings.timestamp) < SETTINGS_CACHE_TTL) {
+            return cachedSettings.data;
+        }
 
         const res = await client.execute({
             sql: 'SELECT data FROM settings WHERE id = ?',
             args: ['current']
         });
 
-        cachedSettings = res.rows[0] ? JSON.parse(res.rows[0].data as string) : DEFAULT_SETTINGS;
-        return cachedSettings as AppSettings;
+        const parsed = res.rows[0] ? JSON.parse(res.rows[0].data as string) : DEFAULT_SETTINGS;
+        cachedSettings = { data: parsed, timestamp: now };
+        return parsed;
     },
 
     async saveSettings(settings: AppSettings) {
@@ -44,8 +49,8 @@ export const dataService = {
             });
         }
 
-        // Invalidate settings cache
-        cachedSettings = settings;
+        // Update cache immediately so next request gets fresh data without a DB hit
+        cachedSettings = { data: settings, timestamp: Date.now() };
     },
 
     async getTodayQueue(): Promise<Order[]> {
@@ -160,5 +165,14 @@ export const dataService = {
 
         // Invalidate queue cache
         cachedQueue = null;
-    }
+    },
+
+    // ── Manual cache invalidation 
+    invalidateQueueCache() {
+        cachedQueue = null;
+    },
+
+    invalidateSettingsCache() {
+        cachedSettings = null;
+    },
 };

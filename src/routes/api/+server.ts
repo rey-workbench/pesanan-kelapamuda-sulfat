@@ -12,14 +12,18 @@ export const POST: RequestHandler = async ({ request }) => {
         switch (action) {
             case 'addOrder':
                 await dataService.addOrder(payload);
+                // Bust queue cache so next page load sees the new order immediately
+                dataService.invalidateQueueCache();
                 return json({ success: true });
 
             case 'updateStatus':
                 await dataService.updateOrderStatus(payload.id, payload.status);
+                dataService.invalidateQueueCache();
                 return json({ success: true });
 
             case 'deleteOrder':
                 await dataService.deleteOrder(payload.id);
+                dataService.invalidateQueueCache();
                 return json({ success: true });
 
             case 'saveSettings':
