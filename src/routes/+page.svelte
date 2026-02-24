@@ -1,20 +1,16 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { dbService } from "$lib/db";
-    import type {
-        Order,
-        AppSettings,
-        ProductType,
-        OrderItem,
-        OrderOption,
-    } from "$lib/models";
+    import type { ProductType, OrderOption, OrderItem } from "$lib/models";
     import { User, ChevronRight, X, Plus } from "lucide-svelte";
-    import Header from "$lib/components/Header.svelte";
     import Modal from "$lib/components/Modal.svelte";
-    import { goto } from "$app/navigation";
+    import { goto, invalidateAll } from "$app/navigation";
+    import { formatCurrency, apiCall } from "$lib/utils";
+    import { ui } from "$lib/ui.svelte";
 
-    let settings = $state<AppSettings | null>(null);
-    let queue = $state<Order[]>([]);
+    let { data } = $props();
+
+    // Use server data
+    let settings = $derived(data.settings);
+    let queue = $derived(data.queue);
 
     // Current Item State
     let selectedProduct = $state<ProductType | null>(null);
@@ -33,12 +29,26 @@
     );
     let change = $derived(cash !== null ? Math.max(0, cash - total) : 0);
 
-    onMount(async () => {
-        const s = await dbService.getSettings();
-        settings = s;
-        if (s.products.length > 0) selectedProduct = s.products[0];
-        if (s.options && s.options.length > 0) selectedOption = s.options[0];
-        queue = await dbService.getTodayQueue();
+    let isInitialized = false;
+    $effect(() => {
+        if (settings && !isInitialized) {
+            if (settings.products.length > 0)
+                selectedProduct = settings.products[0];
+            if (settings.options && settings.options.length > 0)
+                selectedOption = settings.options[0];
+            isInitialized = true;
+        }
+    });
+
+    $effect(() => {
+        // Sync Header
+        ui.setPage({
+            title: settings?.storeName,
+            subtitle: "Order Baru",
+            pending: queue.filter((q) => q.status === "pending").length,
+            completed: queue.filter((q) => q.status === "completed").length,
+            showBack: false,
+        });
     });
 
     function handleAddToCart() {
@@ -79,7 +89,7 @@
         isSubmitting = true;
 
         try {
-            await dbService.addOrder({
+            await apiCall("addOrder", {
                 customerName,
                 items: $state.snapshot(cart),
                 total,
@@ -91,29 +101,13 @@
             customerName = "";
             cart = [];
             cash = null;
+            await invalidateAll();
             goto("/queue");
         } finally {
             isSubmitting = false;
         }
     }
-
-    function formatCurrency(val: number) {
-        return new Intl.NumberFormat("id-ID", {
-            style: "currency",
-            currency: "IDR",
-            minimumFractionDigits: 0,
-        }).format(val);
-    }
 </script>
-
-<div class="sticky top-0 z-30">
-    <Header
-        title={settings?.storeName}
-        subtitle="Order Baru"
-        pending={queue.filter((q) => q.status === "pending").length}
-        completed={queue.filter((q) => q.status === "completed").length}
-    />
-</div>
 
 <div class="px-5 pt-4 pb-32 space-y-8 max-w-md mx-auto">
     <!-- Customer Input -->

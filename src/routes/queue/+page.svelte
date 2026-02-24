@@ -1,43 +1,37 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { dbService } from "$lib/db";
-    import type { Order, AppSettings } from "$lib/models";
+    import type { Order } from "$lib/models";
     import { CheckCircle2 } from "lucide-svelte";
-    import Header from "$lib/components/Header.svelte";
+    import { invalidateAll } from "$app/navigation";
+    import { formatCurrency, apiCall } from "$lib/utils";
+    import { ui } from "$lib/ui.svelte";
 
-    let settings = $state<AppSettings | null>(null);
-    let queue = $state<Order[]>([]);
+    let { data } = $props();
 
-    onMount(async () => {
-        settings = await dbService.getSettings();
-        await refreshQueue();
+    // Use server data
+    let queue = $derived(data.queue);
+    let pendingOrders = $derived(queue.filter((q) => q.status === "pending"));
+    let completedCount = $derived(
+        queue.filter((q) => q.status === "completed").length,
+    );
+
+    // Sync Header
+    $effect(() => {
+        ui.setPage({
+            title: data.settings?.storeName,
+            subtitle: "Antrean Berjalan",
+            pending: pendingOrders.length,
+            completed: completedCount,
+            showBack: false,
+        });
     });
-
-    async function refreshQueue() {
-        queue = await dbService.getTodayQueue();
-    }
 
     async function handleComplete(id: number | undefined) {
         if (!id) return;
-        await dbService.updateOrderStatus(id, "completed");
-        await refreshQueue();
-    }
 
-    function formatCurrency(val: number) {
-        return new Intl.NumberFormat("id-ID", {
-            style: "currency",
-            currency: "IDR",
-            minimumFractionDigits: 0,
-        }).format(val);
+        await apiCall("updateStatus", { id, status: "completed" });
+        await invalidateAll();
     }
 </script>
-
-<Header
-    title={settings?.storeName}
-    subtitle="Antrean Berjalan"
-    pending={queue.filter((q) => q.status === "pending").length}
-    completed={queue.filter((q) => q.status === "completed").length}
-/>
 
 <div class="px-5 pt-6 pb-28 animate-in max-w-md mx-auto">
     <div class="flex items-center justify-between mb-6 px-1">
@@ -50,7 +44,7 @@
 
     <!-- Vertical Stack Layout -->
     <div class="flex flex-col gap-5">
-        {#each queue.filter((q) => q.status === "pending") as item, i (item.id)}
+        {#each pendingOrders as item, i (item.id)}
             <div
                 class="simple-card animate-in slide-in-from-bottom-4 duration-300"
             >
@@ -118,7 +112,7 @@
             </div>
         {/each}
 
-        {#if queue.filter((q) => q.status === "pending").length === 0}
+        {#if pendingOrders.length === 0}
             <div
                 class="flex flex-col items-center justify-center py-32 text-slate-400"
             >

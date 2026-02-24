@@ -1,23 +1,35 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { dbService } from "$lib/db";
-    import type { Order, AppSettings } from "$lib/models";
+    import type { Order } from "$lib/models";
     import { Download, Trash2, Search } from "lucide-svelte";
-    import Header from "$lib/components/Header.svelte";
     import * as XLSX from "xlsx";
     import Modal from "$lib/components/Modal.svelte";
+    import { invalidateAll } from "$app/navigation";
+    import { formatCurrency, apiCall } from "$lib/utils";
+    import { ui } from "$lib/ui.svelte";
 
-    let settings = $state<AppSettings | null>(null);
-    let history = $state<Order[]>([]);
+    let { data } = $props();
+
+    // Use server data
+    let history = $derived(data.history);
     let searchTerm = $state("");
+
+    // Sync Header
+    $effect(() => {
+        ui.setPage({
+            title: data.settings?.storeName,
+            subtitle: "Riwayat Transaksi",
+            pending: (data.queue || []).filter(
+                (q: any) => q.status === "pending",
+            ).length,
+            completed: (data.queue || []).filter(
+                (q: any) => q.status === "completed",
+            ).length,
+            showBack: false,
+        });
+    });
 
     let showDeleteModal = $state(false);
     let itemToDelete = $state<number | undefined>(undefined);
-
-    onMount(async () => {
-        settings = await dbService.getSettings();
-        history = await dbService.getOrders();
-    });
 
     function handleDelete(id: number | undefined) {
         if (!id) return;
@@ -27,8 +39,9 @@
 
     async function confirmDelete() {
         if (!itemToDelete) return;
-        await dbService.deleteOrder(itemToDelete);
-        history = await dbService.getOrders();
+
+        await apiCall("deleteOrder", { id: itemToDelete });
+        await invalidateAll();
         itemToDelete = undefined;
     }
 
@@ -55,14 +68,6 @@
         );
     }
 
-    function formatCurrency(val: number) {
-        return new Intl.NumberFormat("id-ID", {
-            style: "currency",
-            currency: "IDR",
-            minimumFractionDigits: 0,
-        }).format(val);
-    }
-
     const filteredHistory = $derived(
         history
             .filter(
@@ -77,8 +82,6 @@
             .sort((a, b) => b.createdAt - a.createdAt),
     );
 </script>
-
-<Header title={settings?.storeName} subtitle="Riwayat Transaksi" />
 
 <div class="px-5 pb-32 space-y-8 mt-4 max-w-md mx-auto">
     <!-- Controls -->

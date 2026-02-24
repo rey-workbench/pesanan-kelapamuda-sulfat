@@ -1,11 +1,12 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { dbService } from "$lib/db";
-    import Header from "$lib/components/Header.svelte";
     import type { AppSettings, ProductType } from "$lib/models";
     import { X, Save, Plus } from "lucide-svelte";
-    import { goto } from "$app/navigation";
+    import { goto, invalidateAll } from "$app/navigation";
     import Modal from "$lib/components/Modal.svelte";
+    import { apiCall } from "$lib/utils";
+    import { ui } from "$lib/ui.svelte";
+
+    let { data } = $props();
 
     let editedStoreName = $state("");
     let editedProducts = $state<ProductType[]>([]);
@@ -28,11 +29,25 @@
         modal = { show: true, title, message, type, onConfirm };
     }
 
-    onMount(async () => {
-        const s = await dbService.getSettings();
-        editedStoreName = s.storeName;
-        editedProducts = s.products.map((p) => ({ ...p }));
-        editedOptions = [...(s.options || [])];
+    let isInitialized = false;
+    $effect(() => {
+        // Initialize once when data is ready
+        if (data.settings && !isInitialized) {
+            const s = data.settings;
+            editedStoreName = s.storeName;
+            editedProducts = s.products.map((p: any) => ({ ...p }));
+            editedOptions = [...(s.options || [])];
+            isInitialized = true;
+        }
+    });
+
+    $effect(() => {
+        // Sync Header (Always run, but doesn't depend on edited local state)
+        ui.setPage({
+            title: "Pengaturan",
+            subtitle: "Konfigurasi Toko",
+            showBack: true,
+        });
     });
 
     function triggerSave() {
@@ -56,8 +71,8 @@
         };
 
         try {
-            JSON.stringify(newSettings);
-            await dbService.saveSettings(newSettings);
+            await apiCall("saveSettings", newSettings);
+            await invalidateAll();
             showModal("Berhasil", "Pengaturan berhasil disimpan!", "info", () =>
                 goto("/"),
             );
@@ -87,8 +102,6 @@
         editedOptions = editedOptions.filter((_, i) => i !== index);
     }
 </script>
-
-<Header title="Pengaturan" subtitle="Konfigurasi Toko" showBack={true} />
 
 <div class="px-5 pb-32 space-y-8 mt-4 max-w-md mx-auto">
     <!-- Store Name -->
