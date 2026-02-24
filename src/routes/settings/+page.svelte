@@ -175,6 +175,7 @@
                                 <input
                                     id="prod-price-{i}"
                                     type="number"
+                                    inputmode="numeric"
                                     placeholder="0"
                                     bind:value={prod.price}
                                     class="w-full h-12 pl-10 pr-4 bg-slate-50 rounded-xl border border-slate-200 text-sm font-bold text-slate-900 outline-none focus:bg-white focus:border-emerald-500 transition-colors font-mono"

@@ -2,17 +2,27 @@ import client, { initDB } from './db';
 import type { Order, AppSettings } from '../models';
 import { DEFAULT_SETTINGS } from '../models';
 
+// In-memory cache
+let cachedSettings: AppSettings | null = null;
+let cachedQueue: { data: Order[], timestamp: number } | null = null;
+const QUEUE_CACHE_TTL = 5000; // 5 seconds cache for queue
+
 export const dataService = {
     async init() {
         await initDB();
     },
 
     async getSettings(): Promise<AppSettings> {
+        // Return from cache if available
+        if (cachedSettings) return cachedSettings;
+
         const res = await client.execute({
             sql: 'SELECT data FROM settings WHERE id = ?',
             args: ['current']
         });
-        return res.rows[0] ? JSON.parse(res.rows[0].data as string) : DEFAULT_SETTINGS;
+
+        cachedSettings = res.rows[0] ? JSON.parse(res.rows[0].data as string) : DEFAULT_SETTINGS;
+        return cachedSettings as AppSettings;
     },
 
     async saveSettings(settings: AppSettings) {
@@ -33,15 +43,25 @@ export const dataService = {
                 args: ['current', data]
             });
         }
+
+        // Invalidate settings cache
+        cachedSettings = settings;
     },
 
     async getTodayQueue(): Promise<Order[]> {
+        const now = Date.now();
+        // Return from cache if fresh
+        if (cachedQueue && (now - cachedQueue.timestamp) < QUEUE_CACHE_TTL) {
+            return cachedQueue.data;
+        }
+
         const today = new Date().toISOString().split('T')[0];
         const res = await client.execute({
             sql: 'SELECT * FROM orders WHERE date = ? ORDER BY createdAt ASC',
             args: [today]
         });
-        return res.rows.map(row => ({
+
+        const data = res.rows.map(row => ({
             id: row.id as number,
             customerName: row.customerName as string,
             items: JSON.parse(row.items as string),
@@ -52,6 +72,10 @@ export const dataService = {
             status: row.status as any,
             createdAt: row.createdAt as number
         }));
+
+        // Update cache
+        cachedQueue = { data, timestamp: now };
+        return data;
     },
 
     async getOrders(): Promise<Order[]> {
@@ -70,7 +94,7 @@ export const dataService = {
     },
 
     async addOrder(order: Omit<Order, 'id' | 'createdAt' | 'status'>) {
-        return await client.execute({
+        const res = await client.execute({
             sql: `INSERT INTO orders (customerName, items, total, cash, change, date, createdAt)
                   VALUES (?, ?, ?, ?, ?, ?, ?)`,
             args: [
@@ -83,6 +107,10 @@ export const dataService = {
                 Date.now()
             ]
         });
+
+        // Invalidate queue cache
+        cachedQueue = null;
+        return res;
     },
 
     async updateOrderStatus(id: number, status: Order['status']) {
@@ -90,6 +118,9 @@ export const dataService = {
             sql: 'UPDATE orders SET status = ? WHERE id = ?',
             args: [status, id]
         });
+
+        // Invalidate queue cache
+        cachedQueue = null;
     },
 
     async deleteOrder(id: number) {
@@ -97,5 +128,8 @@ export const dataService = {
             sql: 'DELETE FROM orders WHERE id = ?',
             args: [id]
         });
+
+        // Invalidate queue cache
+        cachedQueue = null;
     }
 };

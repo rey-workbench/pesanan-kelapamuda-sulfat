@@ -205,6 +205,7 @@
                 <input
                     id="quantityInput"
                     type="number"
+                    inputmode="numeric"
                     bind:value={quantity}
                     min="1"
                     class="w-full bg-transparent border-none p-0 text-center font-bold text-lg text-slate-900 outline-none"
@@ -324,6 +325,7 @@
                     <input
                         id="cashInput"
                         type="number"
+                        inputmode="numeric"
                         bind:value={cash}
                         placeholder="0"
                         class="w-full h-16 pl-14 pr-5 bg-white rounded-xl border-none font-black text-2xl text-slate-900 outline-none focus:ring-4 focus:ring-emerald-500/30 transition-shadow font-mono"
