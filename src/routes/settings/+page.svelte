@@ -9,7 +9,6 @@
 
     let { data } = $props();
 
-    // Renamed from 'state' to 'cfg' to avoid conflict with Svelte's $state rune
     const cfg = new SettingsState({
         settings: data.settings ?? { storeName: "", products: [], options: [] },
     });

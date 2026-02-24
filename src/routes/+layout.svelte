@@ -5,7 +5,7 @@
 	import Header from "$lib/components/Header.svelte";
 	import Modal from "$lib/components/Modal.svelte";
 	import PWAPrompt from "$lib/components/PWAPrompt.svelte";
-	import { ui } from "$lib/ui.svelte";
+	import { ui } from "$lib/state/ui.svelte";
 
 	let { data, children } = $props();
 

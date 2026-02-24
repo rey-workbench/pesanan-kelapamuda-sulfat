@@ -2,10 +2,7 @@ import type { PageServerLoad } from './$types';
 import { dataService } from '$lib/server/dataService';
 
 export const load: PageServerLoad = async ({ parent }) => {
-    // Data settings & queue sudah dari layout
-    await parent();
-
-    // Khusus Laporan butuh riwayat lengkap
+    await parent(); // Ensure data from layout is loaded
     const history = await dataService.getOrders();
 
     return { history };

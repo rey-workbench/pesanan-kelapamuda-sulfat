@@ -1,19 +1,29 @@
 import type { Order, AppSettings } from "$lib/models";
 import { ui } from "$lib/state/ui.svelte";
+import { apiCall } from "$lib/utils";
+import { invalidateAll } from "$app/navigation";
+import * as XLSX from "xlsx";
 
 export class ReportsState {
     data = $state<{ orders: Order[]; settings: AppSettings }>();
     filterDate = $state("");
     showCalendar = $state(false);
 
+    showDeleteModal = $state(false);
+    deleteId = $state<number | null>(null);
+
     constructor(initialData: { orders: Order[]; settings: AppSettings }) {
         this.data = initialData;
-        // Default to today
         this.filterDate = new Date().toISOString().split('T')[0];
     }
 
     updateData(newData: { orders: Order[]; settings: AppSettings }) {
         this.data = newData;
+    }
+
+    openDeleteModal(id: number) {
+        this.deleteId = id;
+        this.showDeleteModal = true;
     }
 
     filteredOrders = $derived(
@@ -37,11 +47,6 @@ export class ReportsState {
     async exportToExcel() {
         ui.showLoading("Mengekspor Data", "Sedang menyiapkan file Excel...");
         try {
-            const xlsxUrl = /* @ts-ignore */ "https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js";
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            const { utils, writeFile } = await import(xlsxUrl as any);
-
             const exportData = this.filteredOrders.map((o) => ({
                 ID: o.id,
                 Tanggal: o.date,
@@ -54,10 +59,10 @@ export class ReportsState {
                 Catatan: o.catatan || "-",
             }));
 
-            const ws = utils.json_to_sheet(exportData);
-            const wb = utils.book_new();
-            utils.book_append_sheet(wb, ws, "Laporan Pesanan");
-            writeFile(
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan Pesanan");
+            XLSX.writeFile(
                 wb,
                 `Laporan_Pesan_Degan_${this.filterDate || "Semua"}.xlsx`
             );
@@ -66,6 +71,21 @@ export class ReportsState {
             alert("Gagal mengekspor data. Pastikan koneksi internet stabil.");
         } finally {
             ui.hideLoading();
+        }
+    }
+
+    async confirmDelete() {
+        if (!this.deleteId) return;
+
+        ui.showLoading('Menghapus', 'Menghapus pesanan...');
+        try {
+            await apiCall("deleteOrder", { id: this.deleteId });
+            await invalidateAll();
+            this.showDeleteModal = false;
+        } catch (error) {
+            console.error('Delete failed:', error);
+        } finally {
+            setTimeout(() => ui.hideLoading(), 500);
         }
     }
 }
