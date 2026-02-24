@@ -86,7 +86,7 @@
 
         <!-- Export -->
         <Button
-            variant="slate"
+            variant="emerald"
             size="sm"
             class="flex-none h-11 px-3 rounded-xl"
             onclick={() => state.exportToExcel()}

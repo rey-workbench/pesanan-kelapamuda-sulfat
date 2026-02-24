@@ -28,8 +28,8 @@ export class SettingsState {
     addProduct() {
         if (!this.settings) return;
         this.settings.products = [
+            { name: "", price: 0 },
             ...this.settings.products,
-            { name: "Menu Baru", price: 0 },
         ];
     }
 
@@ -40,7 +40,7 @@ export class SettingsState {
 
     addOption() {
         if (!this.settings) return;
-        this.settings.options = [...this.settings.options, "Opsi Baru"];
+        this.settings.options = ["", ...this.settings.options];
     }
 
     removeOption(index: number) {

@@ -174,7 +174,7 @@
                             <div class="flex items-center gap-2">
                                 <!-- Qty +/- are inline spinner controls — unstyled for custom sizing -->
                                 <Button
-                                    variant="secondary"
+                                    variant="danger"
                                     size="sm"
                                     class="w-8 h-8 p-0 rounded-lg"
                                     onclick={() =>
@@ -187,7 +187,7 @@
                                     >{it.quantity}</span
                                 >
                                 <Button
-                                    variant="secondary"
+                                    variant="emerald"
                                     size="sm"
                                     class="w-8 h-8 p-0 rounded-lg"
                                     onclick={() =>
@@ -206,7 +206,7 @@
                                     class="px-3 py-1.5 rounded-lg border-2 text-[10px] font-bold transition-all {it.options.includes(
                                         opt,
                                     )
-                                        ? 'bg-blue-600 border-blue-600 text-white'
+                                        ? 'bg-emerald-600 border-emerald-600 text-white'
                                         : 'bg-white border-slate-200 text-slate-600'}"
                                     onclick={() => state.toggleOption(idx, opt)}
                                 >

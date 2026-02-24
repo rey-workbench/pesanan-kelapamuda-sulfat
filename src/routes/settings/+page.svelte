@@ -1,23 +1,21 @@
 <script lang="ts">
-    import type { AppSettings, ProductType } from "$lib/models";
     import { Plus, X, Save } from "lucide-svelte";
-    import { goto, invalidateAll } from "$app/navigation";
     import Modal from "$lib/components/layout/Modal.svelte";
     import SectionHeader from "$lib/components/shared/SectionHeader.svelte";
     import Card from "$lib/components/ui/Card.svelte";
     import Button from "$lib/components/ui/Button.svelte";
-    import { apiCall } from "$lib/utils";
     import { ui } from "$lib/state/ui.svelte";
     import { SettingsState } from "$lib/state/settings.svelte";
 
     let { data } = $props();
 
-    const state = new SettingsState({
+    // Renamed from 'state' to 'cfg' to avoid conflict with Svelte's $state rune
+    const cfg = new SettingsState({
         settings: data.settings ?? { storeName: "", products: [], options: [] },
     });
 
     $effect(() => {
-        if (data.settings) state.updateData({ settings: data.settings });
+        if (data.settings) cfg.updateData({ settings: data.settings });
     });
 
     $effect(() => {
@@ -27,6 +25,28 @@
             showBack: true,
         });
     });
+
+    const COLLAPSE_LIMIT = 3;
+
+    let showAllProducts = $state(false);
+    let showAllOptions = $state(false);
+
+    const visibleProducts = $derived(
+        showAllProducts
+            ? cfg.settings?.products || []
+            : (cfg.settings?.products || []).slice(0, COLLAPSE_LIMIT),
+    );
+    const visibleOptions = $derived(
+        showAllOptions
+            ? cfg.settings?.options || []
+            : (cfg.settings?.options || []).slice(0, COLLAPSE_LIMIT),
+    );
+    const hiddenProductCount = $derived(
+        Math.max(0, (cfg.settings?.products?.length || 0) - COLLAPSE_LIMIT),
+    );
+    const hiddenOptionCount = $derived(
+        Math.max(0, (cfg.settings?.options?.length || 0) - COLLAPSE_LIMIT),
+    );
 </script>
 
 <div class="container-sm pb-36 space-y-5 mt-3 animate-in">
@@ -36,7 +56,7 @@
         <input
             id="storeName"
             type="text"
-            bind:value={state.settings!.storeName}
+            bind:value={cfg.settings!.storeName}
             placeholder="Nama Toko..."
             class="input-pos w-full"
         />
@@ -49,15 +69,18 @@
             <Button
                 variant="emerald"
                 size="sm"
-                onclick={() => state.addProduct()}
+                onclick={() => cfg.addProduct()}
             >
                 <Plus size={14} strokeWidth={3} /> Tambah
             </Button>
         </div>
 
         <div class="space-y-3">
-            {#each state.settings?.products || [] as prod, i}
-                <Card padding="sm" class="space-y-3">
+            {#each visibleProducts as prod, i}
+                <Card
+                    padding="sm"
+                    class="space-y-3 animate-in zoom-in-95 duration-150"
+                >
                     <div class="grid grid-cols-2 gap-3">
                         <div class="space-y-1.5">
                             <label
@@ -99,12 +122,35 @@
                         variant="danger"
                         size="sm"
                         class="w-full"
-                        onclick={() => state.removeProduct(i)}
+                        onclick={() =>
+                            cfg.removeProduct(
+                                cfg.settings!.products.indexOf(prod),
+                            )}
                     >
                         <X size={14} strokeWidth={2.5} /> Hapus Menu
                     </Button>
                 </Card>
             {/each}
+
+            {#if hiddenProductCount > 0}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    class="w-full text-slate-500"
+                    onclick={() => (showAllProducts = true)}
+                >
+                    Tampilkan {hiddenProductCount} menu lainnya ›
+                </Button>
+            {:else if showAllProducts && (cfg.settings?.products?.length || 0) > COLLAPSE_LIMIT}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    class="w-full text-slate-400"
+                    onclick={() => (showAllProducts = false)}
+                >
+                    Sembunyikan ‹
+                </Button>
+            {/if}
         </div>
     </section>
 
@@ -115,16 +161,16 @@
             <Button
                 variant="secondary"
                 size="sm"
-                onclick={() => state.addOption()}
+                onclick={() => cfg.addOption()}
             >
                 <Plus size={14} strokeWidth={3} /> Tambah
             </Button>
         </div>
 
         <div class="grid grid-cols-1 gap-2">
-            {#each state.settings?.options || [] as opt, i}
+            {#each visibleOptions as opt, i}
                 <div
-                    class="flex gap-2 items-center bg-white p-2.5 rounded-xl border border-slate-200"
+                    class="flex gap-2 items-center bg-white p-2.5 rounded-xl border border-slate-200 animate-in zoom-in-95 duration-150"
                 >
                     <div class="grow">
                         <label for="opt-{i}" class="sr-only">Nama Opsi</label>
@@ -132,7 +178,7 @@
                             id="opt-{i}"
                             type="text"
                             placeholder="Nama Opsi..."
-                            bind:value={state.settings!.options[i]}
+                            bind:value={cfg.settings!.options[i]}
                             class="w-full h-10 bg-slate-50 rounded-lg px-3 border border-slate-200 text-sm font-bold text-slate-900 outline-none focus:border-emerald-500 transition-colors"
                         />
                     </div>
@@ -140,36 +186,59 @@
                         variant="danger"
                         size="sm"
                         class="w-10 h-10 p-0 flex-none rounded-lg"
-                        onclick={() => state.removeOption(i)}
+                        onclick={() =>
+                            cfg.removeOption(
+                                cfg.settings!.options.indexOf(opt),
+                            )}
                     >
                         <X size={16} strokeWidth={2.5} />
                     </Button>
                 </div>
             {/each}
+
+            {#if hiddenOptionCount > 0}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    class="w-full text-slate-500"
+                    onclick={() => (showAllOptions = true)}
+                >
+                    Tampilkan {hiddenOptionCount} opsi lainnya ›
+                </Button>
+            {:else if showAllOptions && (cfg.settings?.options?.length || 0) > COLLAPSE_LIMIT}
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    class="w-full text-slate-400"
+                    onclick={() => (showAllOptions = false)}
+                >
+                    Sembunyikan ‹
+                </Button>
+            {/if}
         </div>
     </section>
 </div>
 
-<!-- Floating Save Button -->
-<div class="fixed bottom-20 left-0 right-0 px-4 z-40 pointer-events-none">
+<!-- Compact floating save -->
+<div class="fixed bottom-20 left-0 right-0 px-5 z-40 pointer-events-none">
     <div class="max-w-md mx-auto pointer-events-auto">
         <Button
             variant="emerald"
-            size="lg"
-            class="w-full shadow-2xl uppercase tracking-widest"
-            onclick={() => state.saveSettings()}
+            size="md"
+            class="w-full shadow-xl"
+            onclick={() => cfg.saveSettings()}
         >
-            <Save size={18} strokeWidth={3} />
+            <Save size={16} strokeWidth={3} />
             Simpan Konfigurasi
         </Button>
     </div>
 </div>
 
 <Modal
-    bind:show={state.showModal}
-    title={state.modalTitle}
-    message={state.modalMessage}
-    type={state.modalType}
-    confirmText={state.modalType === "info" ? "Tutup" : "Ya, Simpan"}
-    onConfirm={() => state.confirmSave()}
+    bind:show={cfg.showModal}
+    title={cfg.modalTitle}
+    message={cfg.modalMessage}
+    type={cfg.modalType}
+    confirmText={cfg.modalType === "info" ? "Tutup" : "Ya, Simpan"}
+    onConfirm={() => cfg.confirmSave()}
 />

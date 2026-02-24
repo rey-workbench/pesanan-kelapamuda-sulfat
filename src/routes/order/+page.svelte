@@ -131,16 +131,22 @@
     <section class="space-y-2">
         <div class="flex justify-between items-center px-1">
             <SectionHeader title="Bayar Tunai" />
-            <Button
-                variant="unstyled"
-                size="sm"
-                class="text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition-all {state.showCashCard
-                    ? 'bg-slate-900 text-white border-slate-900'
-                    : 'bg-slate-100 text-slate-600 border-slate-200'}"
+            <!-- Toggle pill: green=active, slate=inactive -->
+            <button
+                role="switch"
+                aria-checked={state.showCashCard}
                 onclick={() => (state.showCashCard = !state.showCashCard)}
+                class="flex items-center gap-2 h-9 px-3.5 rounded-full border-2 font-bold text-xs transition-all duration-200 {state.showCashCard
+                    ? 'bg-emerald-600 border-emerald-600 text-white'
+                    : 'bg-white border-slate-200 text-slate-500'}"
             >
+                <span
+                    class="w-2 h-2 rounded-full transition-all {state.showCashCard
+                        ? 'bg-white'
+                        : 'bg-slate-300'}"
+                ></span>
                 {state.showCashCard ? "Aktif" : "Nonaktif"}
-            </Button>
+            </button>
         </div>
 
         {#if state.showCashCard}

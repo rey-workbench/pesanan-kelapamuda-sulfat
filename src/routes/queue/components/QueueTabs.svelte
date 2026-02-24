@@ -12,22 +12,22 @@
     <Button
         variant="unstyled"
         size="sm"
-        class="flex-1 flex justify-center items-center py-2.5 rounded-lg text-sm font-bold transition-all {state.activeTab ===
+        class="flex-1 flex justify-center items-center gap-1.5 py-2.5 px-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap {state.activeTab ===
         'pending'
             ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
-            : 'text-slate-500 hover:text-slate-700'}"
+            : 'text-slate-500'}"
         onclick={() => (state.activeTab = "pending")}
     >
         <Clock
-            size={15}
+            size={13}
             strokeWidth={2.5}
-            class="mr-1.5 {state.activeTab === 'pending'
+            class="{state.activeTab === 'pending'
                 ? 'text-blue-500'
-                : 'text-slate-400'}"
+                : 'text-slate-400'} shrink-0"
         />
-        Sedang Dibuat
+        Dibuat
         {#if state.pendingOrders.length > 0}
-            <span class="ml-2 badge-blue h-5 px-1.5 min-w-5 shrink-0"
+            <span class="badge-blue h-4 px-1.5 min-w-4 text-[9px] shrink-0"
                 >{state.pendingOrders.length}</span
             >
         {/if}
@@ -35,22 +35,22 @@
     <Button
         variant="unstyled"
         size="sm"
-        class="flex-1 flex justify-center items-center py-2.5 rounded-lg text-sm font-bold transition-all {state.activeTab ===
+        class="flex-1 flex justify-center items-center gap-1.5 py-2.5 px-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap {state.activeTab ===
         'ready'
             ? 'bg-white text-slate-900 shadow-sm border border-slate-200'
-            : 'text-slate-500 hover:text-slate-700'}"
+            : 'text-slate-500'}"
         onclick={() => (state.activeTab = "ready")}
     >
         <CheckCircle2
-            size={15}
+            size={13}
             strokeWidth={2.5}
-            class="mr-1.5 {state.activeTab === 'ready'
+            class="{state.activeTab === 'ready'
                 ? 'text-emerald-500'
-                : 'text-slate-400'}"
+                : 'text-slate-400'} shrink-0"
         />
         Siap Ambil
         {#if state.readyOrders.length > 0}
-            <span class="ml-2 badge-emerald h-5 px-1.5 min-w-5 shrink-0"
+            <span class="badge-emerald h-4 px-1.5 min-w-4 text-[9px] shrink-0"
                 >{state.readyOrders.length}</span
             >
         {/if}
