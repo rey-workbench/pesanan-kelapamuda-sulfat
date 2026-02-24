@@ -5,8 +5,8 @@
 	let { children } = $props();
 </script>
 
-<div class="max-w-md mx-auto min-h-screen bg-emerald-50 relative flex flex-col">
-	<main class="flex-grow">
+<div class="max-w-md mx-auto min-h-screen bg-slate-50 relative flex flex-col">
+	<main class="flex-grow pb-24">
 		{@render children()}
 	</main>
 

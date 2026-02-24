@@ -1,11 +1,19 @@
+export type OrderOption = string;
+
+export interface OrderItem {
+    type: string;
+    quantity: number;
+    price: number;
+    option: OrderOption;
+}
+
 export interface Order {
     id?: number;
     customerName: string;
-    quantity: number;
-    price: number;
+    items: OrderItem[];
     total: number;
-    type: string;
-    notes: string;
+    cash: number;
+    change: number;
     date: string;
     status: 'pending' | 'completed' | 'cancelled';
     createdAt: number;
@@ -18,14 +26,12 @@ export interface ProductType {
 
 export interface AppSettings {
     products: ProductType[];
+    options: string[];
     storeName: string;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
     storeName: 'Pesan Degan',
-    products: [
-        { name: 'Biasa', price: 10000 },
-        { name: 'Ijo', price: 15000 },
-        { name: 'Bakar', price: 20000 }
-    ]
+    products: [],
+    options: ['Murni', 'Gula', 'Es', 'Gula & Es']
 };

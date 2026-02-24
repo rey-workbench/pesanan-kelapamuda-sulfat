@@ -30,11 +30,6 @@ async function getDB() {
         }
     });
 
-    // Initialize settings if not exists
-    const settings = await dbInstance.settings.get('current');
-    if (!settings) {
-        await dbInstance.settings.add({ id: 'current', ...DEFAULT_SETTINGS });
-    }
 
     return dbInstance;
 }
@@ -84,6 +79,15 @@ export const dbService = {
     async saveSettings(settings: AppSettings) {
         const db = await getDB();
         if (!db) return;
-        return db.settings.update({ id: 'current', ...settings });
+
+        // Deep clone to remove Svelte proxies/reactive state
+        const plainSettings = JSON.parse(JSON.stringify(settings));
+
+        const existing = await db.settings.get('current');
+        if (existing) {
+            return db.settings.update({ id: 'current', ...plainSettings });
+        } else {
+            return db.settings.add({ id: 'current', ...plainSettings });
+        }
     }
 };
