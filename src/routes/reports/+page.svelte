@@ -5,20 +5,31 @@
     import { Download, Trash2, Search } from "lucide-svelte";
     import Header from "$lib/components/Header.svelte";
     import * as XLSX from "xlsx";
+    import Modal from "$lib/components/Modal.svelte";
 
     let settings = $state<AppSettings | null>(null);
     let history = $state<Order[]>([]);
     let searchTerm = $state("");
+
+    let showDeleteModal = $state(false);
+    let itemToDelete = $state<number | undefined>(undefined);
 
     onMount(async () => {
         settings = await dbService.getSettings();
         history = await dbService.getOrders();
     });
 
-    async function handleDelete(id: number | undefined) {
-        if (!id || !confirm("Hapus data permanen?")) return;
-        await dbService.deleteOrder(id);
+    function handleDelete(id: number | undefined) {
+        if (!id) return;
+        itemToDelete = id;
+        showDeleteModal = true;
+    }
+
+    async function confirmDelete() {
+        if (!itemToDelete) return;
+        await dbService.deleteOrder(itemToDelete);
         history = await dbService.getOrders();
+        itemToDelete = undefined;
     }
 
     function exportData() {
@@ -199,6 +210,16 @@
         {/if}
     </div>
 </div>
+
+<Modal
+    bind:show={showDeleteModal}
+    title="Hapus Data"
+    message="Apakah Anda yakin ingin menghapus data transaksi ini secara permanen?"
+    confirmText="Hapus"
+    cancelText="Batal"
+    type="danger"
+    onConfirm={confirmDelete}
+/>
 
 <style>
     :global(body) {

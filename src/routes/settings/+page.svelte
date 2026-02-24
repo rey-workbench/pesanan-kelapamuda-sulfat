@@ -5,10 +5,28 @@
     import type { AppSettings, ProductType } from "$lib/models";
     import { X, Save, Plus } from "lucide-svelte";
     import { goto } from "$app/navigation";
+    import Modal from "$lib/components/Modal.svelte";
 
     let editedStoreName = $state("");
     let editedProducts = $state<ProductType[]>([]);
     let editedOptions = $state<string[]>([]);
+
+    let modal = $state({
+        show: false,
+        title: "",
+        message: "",
+        type: "confirm" as "confirm" | "info" | "danger",
+        onConfirm: () => {},
+    });
+
+    function showModal(
+        title: string,
+        message: string,
+        type: "confirm" | "info" | "danger" = "confirm",
+        onConfirm: () => void = () => {},
+    ) {
+        modal = { show: true, title, message, type, onConfirm };
+    }
 
     onMount(async () => {
         const s = await dbService.getSettings();
@@ -17,13 +35,20 @@
         editedOptions = [...(s.options || [])];
     });
 
-    async function saveSettings() {
-        // Prevent empty names
+    function triggerSave() {
         if (!editedStoreName.trim()) {
-            alert("Nama toko tidak boleh kosong.");
+            showModal("Info", "Nama toko tidak boleh kosong.", "info");
             return;
         }
+        showModal(
+            "Simpan Pengaturan?",
+            "Apakah Anda yakin ingin menyimpan konfigurasi toko terbaru?",
+            "confirm",
+            saveSettings,
+        );
+    }
 
+    async function saveSettings() {
         const newSettings: AppSettings = {
             storeName: editedStoreName,
             products: editedProducts.filter((p) => p.name.trim() !== ""),
@@ -31,15 +56,17 @@
         };
 
         try {
-            // Check if settings are valid before saving to avoid DataCloneError
             JSON.stringify(newSettings);
             await dbService.saveSettings(newSettings);
-            alert("Pengaturan berhasil disimpan!");
-            goto("/");
+            showModal("Berhasil", "Pengaturan berhasil disimpan!", "info", () =>
+                goto("/"),
+            );
         } catch (error) {
             console.error("Gagal menyimpan pengaturan:", error);
-            alert(
-                "Terjadi kesalahan saat menyimpan pengaturan. Pastikan data yang dimasukkan valid.",
+            showModal(
+                "Terjadi Kesalahan",
+                "Gagal menyimpan pengaturan. Pastikan data form valid.",
+                "info",
             );
         }
     }
@@ -200,11 +227,21 @@
     </section>
 
     <!-- Save Button -->
-    <button onclick={saveSettings} class="btn-primary">
+    <button onclick={triggerSave} class="btn-primary">
         <Save size={20} strokeWidth={2.5} class="mr-2" />
         Simpan Konfigurasi
     </button>
 </div>
+
+<Modal
+    bind:show={modal.show}
+    title={modal.title}
+    message={modal.message}
+    type={modal.type}
+    confirmText={modal.type === "info" ? "Tutup" : "Ya"}
+    cancelText="Batal"
+    onConfirm={modal.onConfirm}
+/>
 
 <style>
     :global(body) {

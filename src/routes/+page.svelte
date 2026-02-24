@@ -10,6 +10,7 @@
     } from "$lib/models";
     import { User, ChevronRight, X, Plus } from "lucide-svelte";
     import Header from "$lib/components/Header.svelte";
+    import Modal from "$lib/components/Modal.svelte";
     import { goto } from "$app/navigation";
 
     let settings = $state<AppSettings | null>(null);
@@ -25,6 +26,7 @@
     let cart = $state<OrderItem[]>([]);
     let cash = $state<number | null>(null);
     let isSubmitting = $state(false);
+    let showConfirmModal = $state(false);
 
     let total = $derived(
         cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
@@ -65,7 +67,13 @@
         cart = cart.filter((_, i) => i !== index);
     }
 
-    async function handleAddOrder() {
+    function triggerOrder() {
+        if (!customerName || cart.length === 0 || cash === null || cash < total)
+            return;
+        showConfirmModal = true;
+    }
+
+    async function submitOrder() {
         if (!customerName || cart.length === 0 || cash === null) return;
 
         isSubmitting = true;
@@ -355,7 +363,7 @@
             </div>
 
             <button
-                onclick={handleAddOrder}
+                onclick={triggerOrder}
                 disabled={isSubmitting ||
                     !customerName ||
                     cart.length === 0 ||
@@ -371,3 +379,12 @@
         </div>
     </section>
 </div>
+
+<Modal
+    bind:show={showConfirmModal}
+    title="Proses Pesanan?"
+    message="Pastikan rincian pesanan dan nominal pembayaran sudah sesuai."
+    confirmText="Simpan"
+    cancelText="Batal"
+    onConfirm={submitOrder}
+/>
