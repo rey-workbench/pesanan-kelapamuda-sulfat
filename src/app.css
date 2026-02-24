@@ -15,8 +15,12 @@
   @apply bg-white border-b border-slate-200;
 }
 
+@utility clickable-card {
+  @apply bg-white border border-slate-200 rounded-2xl p-4 active:scale-[0.98] active:bg-slate-50 transition-all duration-150 cursor-pointer shadow-sm hover:shadow-md hover:border-emerald-200;
+}
+
 @utility btn-pos {
-  @apply active:scale-[0.98] transition-all flex items-center justify-center font-bold rounded-xl h-14 w-full text-base;
+  @apply active:scale-[0.96] transition-all duration-100 flex items-center justify-center font-bold rounded-xl h-14 w-full text-base cursor-pointer;
 }
 
 @utility btn-primary {

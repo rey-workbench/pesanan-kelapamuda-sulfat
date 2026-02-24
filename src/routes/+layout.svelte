@@ -1,5 +1,6 @@
 <script lang="ts">
 	import "../app.css";
+	import { page } from "$app/state";
 	import BottomNav from "$lib/components/BottomNav.svelte";
 	import Header from "$lib/components/Header.svelte";
 	import Modal from "$lib/components/Modal.svelte";
@@ -37,21 +38,25 @@
 <div
 	class="max-w-md mx-auto min-h-screen bg-slate-50 relative flex flex-col md:border-x md:border-slate-200"
 >
-	<div class="sticky top-0 z-30">
-		<Header
-			title={ui.title}
-			subtitle={ui.subtitle}
-			pending={ui.pending}
-			completed={ui.completed}
-			showBack={ui.showBack}
-		/>
-	</div>
+	{#if page.url.pathname !== "/"}
+		<div class="sticky top-0 z-30">
+			<Header
+				title={ui.title}
+				subtitle={ui.subtitle}
+				pending={ui.pending}
+				completed={ui.completed}
+				showBack={ui.showBack}
+			/>
+		</div>
+	{/if}
 
 	<main class="flex-grow pb-20">
 		{@render children()}
 	</main>
 
-	<BottomNav />
+	{#if page.url.pathname !== "/"}
+		<BottomNav />
+	{/if}
 </div>
 
 <!-- Global Loading Modal -->

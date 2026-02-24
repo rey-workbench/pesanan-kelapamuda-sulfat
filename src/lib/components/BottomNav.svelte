@@ -3,7 +3,7 @@
     import { Plus, ListTodo, History } from "lucide-svelte";
 
     const navItems = [
-        { href: "/", label: "Order", icon: Plus },
+        { href: "/order", label: "Order", icon: Plus },
         { href: "/queue", label: "Antrean", icon: ListTodo },
         { href: "/reports", label: "Laporan", icon: History },
     ];
