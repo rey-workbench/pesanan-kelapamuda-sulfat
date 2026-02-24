@@ -15,7 +15,7 @@ export interface Order {
     cash: number;
     change: number;
     date: string;
-    status: 'pending' | 'completed' | 'cancelled';
+    status: 'pending' | 'completed' | 'picked_up' | 'cancelled';
     createdAt: number;
 }
 

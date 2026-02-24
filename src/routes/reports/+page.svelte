@@ -56,7 +56,7 @@
     }
 
     function exportData() {
-        const data = history.flatMap((o) =>
+        const rows = history.flatMap((o) =>
             o.items.map((item) => ({
                 Tanggal: o.date,
                 Nama: o.customerName,
@@ -66,10 +66,17 @@
                 Harga: item.price,
                 Subtotal: item.price * item.quantity,
                 "Total Transaksi": o.total,
-                Status: o.status,
+                Status:
+                    o.status === "pending"
+                        ? "Menu Dibuat"
+                        : o.status === "completed"
+                          ? "Siap Ambil"
+                          : o.status === "picked_up"
+                            ? "Sudah Diambil"
+                            : o.status,
             })),
         );
-        const ws = XLSX.utils.json_to_sheet(data);
+        const ws = XLSX.utils.json_to_sheet(rows);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Laporan");
         XLSX.writeFile(
@@ -91,6 +98,21 @@
             )
             .sort((a, b) => b.createdAt - a.createdAt),
     );
+
+    function getStatusLabel(status: string) {
+        if (status === "pending") return "Dibuat";
+        if (status === "completed") return "Siap Ambil";
+        if (status === "picked_up") return "Selesai";
+        return status;
+    }
+
+    function getStatusClasses(status: string) {
+        if (status === "picked_up")
+            return "bg-emerald-50 text-emerald-700 border-emerald-200";
+        if (status === "completed")
+            return "bg-blue-50 text-blue-700 border-blue-200";
+        return "bg-slate-50 text-slate-600 border-slate-200";
+    }
 </script>
 
 <div class="px-5 pb-32 space-y-8 mt-4 max-w-md mx-auto">
@@ -168,12 +190,11 @@
                             </p>
                         </div>
                         <div
-                            class="inline-flex items-center px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-widest border
-                            {item.status === 'completed'
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                : 'bg-slate-50 text-slate-600 border-slate-200'}"
+                            class="inline-flex items-center px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-widest border {getStatusClasses(
+                                item.status,
+                            )}"
                         >
-                            {item.status}
+                            {getStatusLabel(item.status)}
                         </div>
                     </div>
                 </div>

@@ -82,7 +82,7 @@
     }
 
     async function submitOrder() {
-        if (!customerName || cart.length === 0 || cash === null) return;
+        if (cart.length === 0 || cash === null) return;
 
         ui.showLoading(
             "Memproses Pesanan",
@@ -91,7 +91,7 @@
 
         try {
             await apiCall("addOrder", {
-                customerName: customerName || "Pelanggan Umum",
+                customerName: customerName.trim() || "Pelanggan Umum",
                 items: $state.snapshot(cart),
                 total,
                 cash: cash || 0,
@@ -295,6 +295,37 @@
                                 </tr>
                             {/each}
                         </tbody>
+                        <tfoot
+                            class="bg-emerald-50 border-t-2 border-slate-200"
+                        >
+                            <tr>
+                                <td
+                                    class="px-5 py-3 text-[10px] font-bold text-emerald-700 uppercase tracking-widest text-right"
+                                >
+                                    Total Pesanan
+                                </td>
+                                <td
+                                    class="px-3 py-3 text-center font-mono font-bold text-emerald-900 text-lg"
+                                >
+                                    <span
+                                        class="bg-emerald-100 px-2.5 py-1 rounded border border-emerald-200"
+                                    >
+                                        {cart.reduce(
+                                            (acc, curr) => acc + curr.quantity,
+                                            0,
+                                        )}
+                                    </span>
+                                </td>
+                                <td
+                                    class="px-5 py-3 text-right font-mono font-black text-emerald-900 text-base"
+                                >
+                                    {formatCurrency(total)
+                                        .replace("Rp", "")
+                                        .trim()}
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             {:else}
@@ -352,17 +383,6 @@
                     <span class="text-2xl font-bold font-mono tracking-tighter"
                         >{formatCurrency(change)}</span
                     >
-                </div>
-                <div class="text-right flex flex-col items-end">
-                    <span
-                        class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest mb-1"
-                        >Total</span
-                    >
-                    <span
-                        class="text-4xl font-black font-mono tracking-tighter leading-none text-emerald-400"
-                    >
-                        {formatCurrency(total)}
-                    </span>
                 </div>
             </div>
 
