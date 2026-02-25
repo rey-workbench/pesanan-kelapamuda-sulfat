@@ -4,10 +4,8 @@ import { DEFAULT_SETTINGS } from '../models';
 
 // ── In-memory server-side cache ───────────────────────────────────────────────
 let cachedSettings: { data: AppSettings; timestamp: number } | null = null;
-let cachedQueue: { data: Order[]; timestamp: number } | null = null;
 
 const SETTINGS_CACHE_TTL = 5 * 60 * 1000;  // 5 minutes — settings rarely change
-const QUEUE_CACHE_TTL = 5 * 1000;       // 5 seconds — queue refreshes on action
 
 export const dataService = {
     async init() {
@@ -54,12 +52,6 @@ export const dataService = {
     },
 
     async getTodayQueue(): Promise<Order[]> {
-        const now = Date.now();
-        // Return from cache if fresh
-        if (cachedQueue && (now - cachedQueue.timestamp) < QUEUE_CACHE_TTL) {
-            return cachedQueue.data;
-        }
-
         const today = new Date().toISOString().split('T')[0];
         const res = await client.execute({
             sql: 'SELECT * FROM orders WHERE date = ? ORDER BY createdAt ASC',
@@ -93,7 +85,6 @@ export const dataService = {
             };
         });
 
-        cachedQueue = { data, timestamp: now };
         return data;
     },
 
@@ -143,7 +134,6 @@ export const dataService = {
             ]
         });
 
-        cachedQueue = null;
         return res;
     },
 
@@ -152,9 +142,6 @@ export const dataService = {
             sql: 'UPDATE orders SET status = ? WHERE id = ?',
             args: [status, id]
         });
-
-        // Invalidate queue cache
-        cachedQueue = null;
     },
 
     async deleteOrder(id: number) {
@@ -162,16 +149,9 @@ export const dataService = {
             sql: 'DELETE FROM orders WHERE id = ?',
             args: [id]
         });
-
-        // Invalidate queue cache
-        cachedQueue = null;
     },
 
     // ── Manual cache invalidation 
-    invalidateQueueCache() {
-        cachedQueue = null;
-    },
-
     invalidateSettingsCache() {
         cachedSettings = null;
     },
