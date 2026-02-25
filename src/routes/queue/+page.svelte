@@ -1,5 +1,13 @@
 <script lang="ts">
-    import { CheckCircle2, UserCheck, Edit2, Plus, Minus } from "lucide-svelte";
+    import {
+        CheckCircle2,
+        UserCheck,
+        Edit2,
+        Plus,
+        Minus,
+        Volume2,
+        VolumeX,
+    } from "lucide-svelte";
     import { ui } from "$lib/state/ui.svelte";
     import Modal from "$lib/components/layout/Modal.svelte";
     import SectionHeader from "$lib/components/shared/SectionHeader.svelte";
@@ -8,6 +16,7 @@
     import Card from "$lib/components/ui/Card.svelte";
     import Button from "$lib/components/ui/Button.svelte";
     import { formatCurrency } from "$lib/utils";
+    import { invalidateAll } from "$app/navigation";
 
     import { QueueState } from "$lib/state/queue.svelte";
     import QueueTabs from "./components/QueueTabs.svelte";
@@ -25,6 +34,16 @@
     });
 
     $effect(() => {
+        const pollInterval = setInterval(() => {
+            if (!state.showEditModal) {
+                invalidateAll();
+            }
+        }, 3000);
+
+        return () => clearInterval(pollInterval);
+    });
+
+    $effect(() => {
         if (state.data?.settings) {
             ui.setPage({
                 title: state.data.settings.storeName || "Antrean",
@@ -37,8 +56,32 @@
     });
 </script>
 
+<svelte:window onclick={() => state.initAudio()} />
+
 <div class="container-sm pt-3 pb-28 animate-in">
-    <QueueTabs {state} />
+    <div class="flex items-center justify-between mb-4">
+        <QueueTabs {state} />
+
+        <div class="flex-none">
+            {#if !state.audioUnlocked}
+                <Button
+                    variant="danger"
+                    size="sm"
+                    onclick={() => state.initAudio()}
+                >
+                    <VolumeX size={16} strokeWidth={2.5} class="mr-2" />
+                    Bisu
+                </Button>
+            {:else}
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-xs border border-emerald-200"
+                >
+                    <Volume2 size={16} strokeWidth={2.5} />
+                    Suara Aktif
+                </div>
+            {/if}
+        </div>
+    </div>
 
     <div class="flex flex-col gap-4">
         {#each state.currentList as item (item.id)}

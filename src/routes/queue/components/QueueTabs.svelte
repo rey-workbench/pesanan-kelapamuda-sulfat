@@ -6,9 +6,7 @@
     let { state } = $props<{ state: QueueState }>();
 </script>
 
-<div
-    class="flex bg-slate-100 p-1 rounded-xl mb-5 border border-slate-200 shadow-sm"
->
+<div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-sm">
     <Button
         variant="unstyled"
         size="sm"

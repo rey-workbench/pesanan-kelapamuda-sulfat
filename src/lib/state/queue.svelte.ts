@@ -11,12 +11,51 @@ export class QueueState {
     editingOrder = $state<Order | null>(null);
     editedItems = $state<OrderItem[]>([]);
 
+    lastMaxId = 0;
+    audioUnlocked = $state(false);
+    audioContext = $state<HTMLAudioElement | null>(null);
+
     constructor(initialData: { queue: Order[]; settings: AppSettings }) {
         this.data = initialData;
+        this.lastMaxId = this.getMaxId(initialData.queue);
+    }
+
+    private getMaxId(queue: Order[]) {
+        if (!queue || queue.length === 0) return 0;
+        return Math.max(...queue.map((q) => q.id || 0));
+    }
+
+    initAudio() {
+        if (!this.audioUnlocked) {
+            try {
+                this.audioContext = new Audio('/notification/masuk.mp3');
+                this.audioContext.volume = 0; // Mainkan tanpa suara untuk bypass security browser
+                this.audioContext.play().then(() => {
+                    this.audioContext!.pause();
+                    this.audioContext!.currentTime = 0;
+                    this.audioContext!.volume = 1; // Kembalikan volume
+                    this.audioUnlocked = true;
+                }).catch(e => console.log("Unlock required interaction", e));
+            } catch (e) { }
+        }
     }
 
     updateData(newData: { queue: Order[]; settings: AppSettings }) {
         this.data = newData;
+
+        const currentMaxId = this.getMaxId(newData.queue);
+        if (currentMaxId > this.lastMaxId) {
+            this.lastMaxId = currentMaxId;
+
+            try {
+                if (this.audioUnlocked && this.audioContext) {
+                    this.audioContext.currentTime = 0;
+                    this.audioContext.play().catch(e => console.error("Play error", e));
+                }
+            } catch (e) {
+                console.error("Audio playback error", e);
+            }
+        }
     }
 
     pendingOrders = $derived(
