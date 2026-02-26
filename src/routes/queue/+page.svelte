@@ -62,25 +62,25 @@
     <div class="flex items-center justify-between mb-4">
         <QueueTabs {state} />
 
-        <div class="flex-none">
-            {#if !state.audioUnlocked}
-                <Button
-                    variant="danger"
-                    size="sm"
-                    onclick={() => state.initAudio()}
-                >
-                    <VolumeX size={16} strokeWidth={2.5} class="mr-2" />
-                    Bisu
-                </Button>
-            {:else}
-                <div
-                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-xs border border-emerald-200"
-                >
-                    <Volume2 size={16} strokeWidth={2.5} />
-                    Suara Aktif
-                </div>
-            {/if}
-        </div>
+        {#if !state.audioUnlocked}
+            <Button
+                variant="danger"
+                size="sm"
+                class="flex items-center justify-center w-11 h-11 p-0 rounded-xl shadow-sm border border-red-100"
+                onclick={() => state.initAudio()}
+            >
+                <VolumeX size={18} strokeWidth={2.5} />
+            </Button>
+        {:else}
+            <Button
+                variant="emerald"
+                size="sm"
+                class="flex items-center justify-center w-11 h-11 p-0 rounded-xl shadow-sm border border-emerald-500"
+                onclick={() => state.initAudio()}
+            >
+                <Volume2 size={18} strokeWidth={2.5} />
+            </Button>
+        {/if}
     </div>
 
     <div class="flex flex-col gap-4">

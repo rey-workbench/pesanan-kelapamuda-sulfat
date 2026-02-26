@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Plus, X, Save } from "lucide-svelte";
+    import { Plus, X, Save, Volume2 } from "lucide-svelte";
     import Modal from "$lib/components/layout/Modal.svelte";
     import SectionHeader from "$lib/components/shared/SectionHeader.svelte";
     import Card from "$lib/components/ui/Card.svelte";
@@ -46,6 +46,17 @@
     const hiddenOptionCount = $derived(
         Math.max(0, (cfg.settings?.options?.length || 0) - COLLAPSE_LIMIT),
     );
+
+    const availableSounds = [
+        { name: "Standard (Masuk)", path: "notification/masuk.mp3" },
+        { name: "Varian (Masuk 2)", path: "notification/masuk2.mp3" },
+    ];
+
+    function previewSound() {
+        if (!cfg.settings?.notificationSound) return;
+        const audio = new Audio(`/${cfg.settings.notificationSound}`);
+        audio.play().catch(console.error);
+    }
 </script>
 
 <div class="container-sm pb-36 space-y-5 mt-3 animate-in">
@@ -211,6 +222,39 @@
                 </Button>
             {/if}
         </div>
+    </section>
+
+    <!-- Notification Sound -->
+    <section class="space-y-3">
+        <SectionHeader title="Notifikasi" />
+        <Card padding="sm" class="space-y-4">
+            <div class="space-y-1.5">
+                <label
+                    for="notif-sound"
+                    class="text-[9px] font-bold text-slate-400 uppercase tracking-widest px-1"
+                    >Suara Pesanan Masuk</label
+                >
+                <div class="flex gap-2">
+                    <select
+                        id="notif-sound"
+                        bind:value={cfg.settings!.notificationSound}
+                        class="grow h-11 bg-slate-50 rounded-xl px-3 border border-slate-200 text-sm font-bold text-slate-900 outline-none focus:border-emerald-500 transition-colors"
+                    >
+                        {#each availableSounds as sound}
+                            <option value={sound.path}>{sound.name}</option>
+                        {/each}
+                    </select>
+                    <Button
+                        variant="ghost"
+                        size="md"
+                        class="bg-slate-50 border border-slate-200 rounded-xl w-11 h-11 p-0 flex items-center justify-center text-slate-600 hover:text-emerald-600"
+                        onclick={previewSound}
+                    >
+                        <Volume2 size={20} />
+                    </Button>
+                </div>
+            </div>
+        </Card>
     </section>
 </div>
 

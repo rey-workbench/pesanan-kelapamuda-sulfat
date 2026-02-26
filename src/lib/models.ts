@@ -29,10 +29,12 @@ export interface AppSettings {
     products: ProductType[];
     options: string[];
     storeName: string;
+    notificationSound?: string;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
     storeName: 'Pesan Degan',
     products: [],
-    options: ['Murni', 'Gula', 'Es', 'Gula & Es']
+    options: ['Murni', 'Gula', 'Es', 'Gula & Es'],
+    notificationSound: 'notification/masuk.mp3'
 };
