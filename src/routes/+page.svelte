@@ -26,7 +26,6 @@
         src="/splash.mp4"
         autoplay
         playsinline
-        muted
         class="splash-video"
         on:ended={onVideoEnded}
         on:error={onVideoError}
