@@ -17,8 +17,7 @@
     const totalQty = $derived(totalQuantity(item.items));
 </script>
 
-<Card class={isReady ? "border-emerald-200 bg-emerald-50/10" : ""}>
-    <!-- Order Header -->
+{#snippet orderHeader()}
     <div class="flex justify-between items-start mb-4">
         <div class="flex items-center gap-3">
             <div
@@ -57,6 +56,33 @@
             </Button>
         {/if}
     </div>
+{/snippet}
+
+{#snippet actionButtons()}
+    {#if !isReady}
+        <Button
+            variant="emerald"
+            size="lg"
+            class="w-full"
+            onclick={() => state.handleStatusUpdate(item.id, "completed")}
+        >
+            <CheckCircle2 size={20} strokeWidth={2.5} /> Selesaikan Pesanan
+        </Button>
+    {:else}
+        <Button
+            variant="emerald"
+            size="lg"
+            class="w-full uppercase tracking-widest"
+            onclick={() => state.handleStatusUpdate(item.id, "picked_up")}
+        >
+            <UserCheck size={20} strokeWidth={2.5} /> Tandai Sudah Diambil
+        </Button>
+    {/if}
+{/snippet}
+
+<Card class={isReady ? "border-emerald-200 bg-emerald-50/10" : ""}>
+    <!-- Order Header -->
+    {@render orderHeader()}
 
     <div class="flex flex-col gap-1.5 mb-4">
         <div
@@ -90,23 +116,5 @@
         </span>
     </div>
 
-    {#if !isReady}
-        <Button
-            variant="emerald"
-            size="lg"
-            class="w-full"
-            onclick={() => state.handleStatusUpdate(item.id, "completed")}
-        >
-            <CheckCircle2 size={20} strokeWidth={2.5} /> Selesaikan Pesanan
-        </Button>
-    {:else}
-        <Button
-            variant="emerald"
-            size="lg"
-            class="w-full uppercase tracking-widest"
-            onclick={() => state.handleStatusUpdate(item.id, "picked_up")}
-        >
-            <UserCheck size={20} strokeWidth={2.5} /> Tandai Sudah Diambil
-        </Button>
-    {/if}
+    {@render actionButtons()}
 </Card>

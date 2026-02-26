@@ -9,6 +9,47 @@
     let { state } = $props<{ state: OrderState }>();
 </script>
 
+{#snippet cartRow(item: any, i: number)}
+    <tr class="hover:bg-slate-50 transition-colors">
+        <td class="px-5 py-4">
+            <div class="font-bold text-slate-900 text-base">
+                {item.type}
+            </div>
+            <div
+                class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1"
+            >
+                {item.options.join(", ") || "-"}
+            </div>
+        </td>
+        <td
+            class="px-3 py-4 text-center font-mono font-bold text-slate-900 text-lg"
+        >
+            <span
+                class="bg-slate-100 px-2.5 py-1 rounded border border-slate-200"
+            >
+                {item.quantity}
+            </span>
+        </td>
+        <td
+            class="px-5 py-4 text-right font-mono font-bold text-slate-900 text-base"
+        >
+            {formatCurrency(item.price * item.quantity)
+                .replace("Rp", "")
+                .trim()}
+        </td>
+        <td class="px-2 py-4 text-center">
+            <Button
+                variant="unstyled"
+                size="sm"
+                class="w-8 h-8 p-0 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                onclick={() => state.removeFromCart(i)}
+            >
+                <X size={18} strokeWidth={3} />
+            </Button>
+        </td>
+    </tr>
+{/snippet}
+
 <section class="space-y-4 pt-4 border-t border-slate-200">
     <SectionHeader title="Ringkasan Pesanan" />
     <Card padding="none" class="overflow-hidden">
@@ -27,46 +68,7 @@
                     </thead>
                     <tbody class="text-sm divide-y divide-slate-100">
                         {#each state.cart as item, i}
-                            <tr class="hover:bg-slate-50 transition-colors">
-                                <td class="px-5 py-4">
-                                    <div
-                                        class="font-bold text-slate-900 text-base"
-                                    >
-                                        {item.type}
-                                    </div>
-                                    <div
-                                        class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1"
-                                    >
-                                        {item.options.join(", ") || "-"}
-                                    </div>
-                                </td>
-                                <td
-                                    class="px-3 py-4 text-center font-mono font-bold text-slate-900 text-lg"
-                                >
-                                    <span
-                                        class="bg-slate-100 px-2.5 py-1 rounded border border-slate-200"
-                                    >
-                                        {item.quantity}
-                                    </span>
-                                </td>
-                                <td
-                                    class="px-5 py-4 text-right font-mono font-bold text-slate-900 text-base"
-                                >
-                                    {formatCurrency(item.price * item.quantity)
-                                        .replace("Rp", "")
-                                        .trim()}
-                                </td>
-                                <td class="px-2 py-4 text-center">
-                                    <Button
-                                        variant="unstyled"
-                                        size="sm"
-                                        class="w-8 h-8 p-0 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                                        onclick={() => state.removeFromCart(i)}
-                                    >
-                                        <X size={18} strokeWidth={3} />
-                                    </Button>
-                                </td>
-                            </tr>
+                            {@render cartRow(item, i)}
                         {/each}
                     </tbody>
                     <tfoot class="bg-emerald-50 border-t-2 border-slate-200">
