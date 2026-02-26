@@ -3,12 +3,11 @@
     import { goto } from "$app/navigation";
     import { ui } from "$lib/ui.svelte";
 
+    let videoEl: HTMLVideoElement;
+
     onMount(() => {
-        ui.setPage({
-            title: "",
-            subtitle: "",
-            showBack: false,
-        });
+        ui.setPage({ title: "", subtitle: "", showBack: false });
+        videoEl?.play().catch(() => goto("/order"));
     });
 
     function onVideoEnded() {
@@ -23,6 +22,7 @@
 <div class="splash-wrapper">
     <!-- svelte-ignore a11y-media-has-caption -->
     <video
+        bind:this={videoEl}
         src="/splash.mp4"
         autoplay
         playsinline
