@@ -28,12 +28,11 @@ export class QueueState {
     initAudio() {
         if (!this.audioUnlocked) {
             try {
-                this.audioContext = new Audio('/notification/masuk.mp3');
-                this.audioContext.volume = 0; // Mainkan tanpa suara untuk bypass security browser
-                this.audioContext.play().then(() => {
-                    this.audioContext!.pause();
-                    this.audioContext!.currentTime = 0;
-                    this.audioContext!.volume = 1; // Kembalikan volume
+                // Gunakan audio pendek/kosong hanya untuk membuka kunci autoplay browser
+                const unlock = new Audio('/notification/masuk.mp3');
+                unlock.volume = 0;
+                unlock.play().then(() => {
+                    unlock.pause();
                     this.audioUnlocked = true;
                 }).catch(e => console.log("Unlock required interaction", e));
             } catch (e) { }
@@ -48,9 +47,10 @@ export class QueueState {
             this.lastMaxId = currentMaxId;
 
             try {
-                if (this.audioUnlocked && this.audioContext) {
-                    this.audioContext.currentTime = 0;
-                    this.audioContext.play().catch(e => console.error("Play error", e));
+                if (this.audioUnlocked) {
+                    const soundPath = newData.settings?.notificationSound || 'notification/masuk.mp3';
+                    const audio = new Audio('/' + soundPath);
+                    audio.play().catch(e => console.error("Play error", e));
                 }
             } catch (e) {
                 console.error("Audio playback error", e);
