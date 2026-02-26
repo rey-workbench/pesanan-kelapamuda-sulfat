@@ -1,25 +1,20 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";
-    import { ui } from "$lib/ui.svelte";
+    import { ui } from "$lib/state/ui.svelte";
 
-    let videoEl: HTMLVideoElement;
-    let isIOS = false;
+    let videoEl: HTMLVideoElement | undefined = $state();
+    let isIOS = $state(false);
 
     onMount(() => {
         ui.setPage({ title: "", subtitle: "", showBack: false });
 
-        // Deteksi iOS (iPhone, iPad, iPod)
         isIOS =
             /iphone|ipad|ipod/i.test(navigator.userAgent) ||
             (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
         if (isIOS) {
-            // iOS: tampilkan icon, redirect setelah 2.5 detik
-            setTimeout(() => goto("/order"), 2500);
-        } else {
-            // Android/Desktop: putar video dengan audio
-            videoEl?.play().catch(() => goto("/order"));
+            setTimeout(() => goto("/order"), 3000);
         }
     });
 
@@ -33,31 +28,26 @@
 </script>
 
 {#if isIOS}
-    <!-- iOS fallback: tampilkan icon -->
     <div class="icon-splash">
-        <img
-            src="/icon-512.png"
-            alt="Es Kelapa Muda Sulfat"
-            class="splash-icon"
-        />
+        <img src="/icon-512.png" alt="Logo" class="splash-icon" />
     </div>
 {:else}
-    <!-- Android / Desktop: putar video -->
+    <!-- svelte-ignore a11y_media_has_caption -->
     <div class="splash-wrapper">
-        <!-- svelte-ignore a11y-media-has-caption -->
         <video
             bind:this={videoEl}
             src="/splash.mp4"
+            autoplay
             playsinline
+            muted
             class="splash-video"
-            on:ended={onVideoEnded}
-            on:error={onVideoError}
+            onended={onVideoEnded}
+            onerror={onVideoError}
         ></video>
     </div>
 {/if}
 
 <style>
-    /* Android/Desktop: fullscreen video */
     .splash-wrapper {
         position: fixed;
         inset: 0;
@@ -74,7 +64,6 @@
         object-fit: cover;
     }
 
-    /* iOS: icon splash */
     .icon-splash {
         position: fixed;
         inset: 0;
@@ -86,20 +75,20 @@
     }
 
     .splash-icon {
-        width: 160px;
-        height: 160px;
+        width: 240px;
+        height: 240px;
         object-fit: contain;
-        animation: pop-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        animation: pop-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
 
     @keyframes pop-in {
         from {
             opacity: 0;
-            transform: scale(0.7);
+            transform: scale(0.5);
         }
         to {
             opacity: 1;
-            transform: scale(1);
+            transform: scale(1.1);
         }
     }
 </style>
