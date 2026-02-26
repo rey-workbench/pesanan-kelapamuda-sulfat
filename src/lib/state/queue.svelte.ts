@@ -13,7 +13,6 @@ export class QueueState {
 
     lastMaxId = 0;
     audioUnlocked = $state(false);
-    audioContext = $state<HTMLAudioElement | null>(null);
 
     constructor(initialData: { queue: Order[]; settings: AppSettings }) {
         this.data = initialData;
@@ -28,7 +27,6 @@ export class QueueState {
     initAudio() {
         if (!this.audioUnlocked) {
             try {
-                // Gunakan audio pendek/kosong hanya untuk membuka kunci autoplay browser
                 const unlock = new Audio('/notification/masuk.mp3');
                 unlock.volume = 0;
                 unlock.play().then(() => {
