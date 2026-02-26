@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { OrderState } from "$lib/state/order.svelte";
-    import SectionHeader from "$lib/components/shared/SectionHeader.svelte";
-    import { formatCurrency } from "$lib/utils";
+    import SectionHeader from "$lib/components/ui/SectionHeader.svelte";
+    import { formatCurrency, totalQuantity } from "$lib/utils";
     import { X, Plus } from "lucide-svelte";
     import Card from "$lib/components/ui/Card.svelte";
     import Button from "$lib/components/ui/Button.svelte";
@@ -82,13 +82,7 @@
                                 <span
                                     class="bg-emerald-100 px-2.5 py-1 rounded border border-emerald-200"
                                 >
-                                    {state.cart.reduce(
-                                        (
-                                            acc: number,
-                                            curr: { quantity: number },
-                                        ) => acc + curr.quantity,
-                                        0,
-                                    )}
+                                    {totalQuantity(state.cart)}
                                 </span>
                             </td>
                             <td

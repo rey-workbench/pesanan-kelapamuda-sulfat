@@ -1,6 +1,5 @@
 <script lang="ts">
     import { fade, scale } from "svelte/transition";
-    import Button from "$lib/components/ui/Button.svelte";
 
     interface Props {
         show: boolean;

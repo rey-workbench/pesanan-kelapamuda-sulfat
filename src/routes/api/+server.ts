@@ -18,6 +18,10 @@ export const POST: RequestHandler = async ({ request }) => {
                 await dataService.updateOrderStatus(payload.id, payload.status);
                 return json({ success: true });
 
+            case 'updateOrder':
+                await dataService.updateOrder(payload.id, payload.order);
+                return json({ success: true });
+
             case 'deleteOrder':
                 await dataService.deleteOrder(payload.id);
                 return json({ success: true });

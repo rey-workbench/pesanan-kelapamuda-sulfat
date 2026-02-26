@@ -1,7 +1,6 @@
 import type { Order, AppSettings } from "$lib/models";
-import { ui } from "$lib/state/ui.svelte";
-import { apiCall } from "$lib/utils";
-import { invalidateAll } from "$app/navigation";
+import { ui } from "$lib/ui.svelte";
+import { apiCall, totalQuantity } from "$lib/utils";
 import * as XLSX from "xlsx";
 
 export class ReportsState {
@@ -14,7 +13,36 @@ export class ReportsState {
 
     constructor(initialData: { orders: Order[]; settings: AppSettings }) {
         this.data = initialData;
-        this.filterDate = new Date().toISOString().split('T')[0];
+        this.filterDate = this.today;
+    }
+
+    get today() {
+        return new Date().toISOString().split('T')[0];
+    }
+
+    get tabItems() {
+        const today = this.today;
+        return [
+            { label: "Hari Ini", value: today },
+            { label: "Semua", value: "" },
+            {
+                label: this.filterDate && this.filterDate !== today
+                    ? this.filterDate.split("-").reverse().join("/")
+                    : "Pilih Tanggal",
+                value: "custom",
+                onclick: () => (this.showCalendar = true)
+            }
+        ];
+    }
+
+    get activeTab() {
+        if (this.filterDate === this.today) return this.today;
+        if (this.filterDate === "") return "";
+        return "custom";
+    }
+
+    setFilterDate(val: string) {
+        if (val !== "custom") this.filterDate = val;
     }
 
     updateData(newData: { orders: Order[]; settings: AppSettings }) {
@@ -38,8 +66,7 @@ export class ReportsState {
 
     totalItems = $derived(
         this.filteredOrders.reduce(
-            (sum, o) =>
-                sum + o.items.reduce((itemSum, it) => itemSum + it.quantity, 0),
+            (sum, o) => sum + totalQuantity(o.items),
             0
         )
     );
@@ -77,15 +104,9 @@ export class ReportsState {
     async confirmDelete() {
         if (!this.deleteId) return;
 
-        ui.showLoading('Menghapus', 'Menghapus pesanan...');
-        try {
+        await ui.withLoading('Menghapus', 'Menghapus pesanan...', async () => {
             await apiCall("deleteOrder", { id: this.deleteId });
-            await invalidateAll();
             this.showDeleteModal = false;
-        } catch (error) {
-            console.error('Delete failed:', error);
-        } finally {
-            setTimeout(() => ui.hideLoading(), 500);
-        }
+        });
     }
 }

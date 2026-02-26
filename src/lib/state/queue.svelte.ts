@@ -1,7 +1,7 @@
-import type { Order, OrderItem, AppSettings } from "$lib/models";
-import { ui } from "$lib/state/ui.svelte";
-import { apiCall } from "$lib/utils";
 import { invalidateAll } from "$app/navigation";
+import type { AppSettings, Order, OrderItem } from "$lib/models";
+import { ui } from "$lib/ui.svelte";
+import { apiCall } from "$lib/utils";
 
 export class QueueState {
     data = $state<{ queue: Order[]; settings: AppSettings }>();
@@ -13,10 +13,19 @@ export class QueueState {
 
     lastMaxId = 0;
     audioUnlocked = $state(false);
+    private audioPlayer: HTMLAudioElement | null = null;
+    private pollInterval: any = null;
 
     constructor(initialData: { queue: Order[]; settings: AppSettings }) {
         this.data = initialData;
         this.lastMaxId = this.getMaxId(initialData.queue);
+        if (typeof Audio !== 'undefined') {
+            this.audioPlayer = new Audio('/' + this.notificationSound);
+        }
+    }
+
+    private get notificationSound() {
+        return this.data?.settings?.notificationSound || 'notification/masuk.mp3';
     }
 
     private getMaxId(queue: Order[]) {
@@ -25,12 +34,12 @@ export class QueueState {
     }
 
     initAudio() {
-        if (!this.audioUnlocked) {
+        if (!this.audioUnlocked && this.audioPlayer) {
             try {
-                const unlock = new Audio('/notification/masuk.mp3');
-                unlock.volume = 0;
-                unlock.play().then(() => {
-                    unlock.pause();
+                this.audioPlayer.volume = 0;
+                this.audioPlayer.play().then(() => {
+                    this.audioPlayer!.pause();
+                    this.audioPlayer!.volume = 1;
                     this.audioUnlocked = true;
                 }).catch(e => console.log("Unlock required interaction", e));
             } catch (e) { }
@@ -45,10 +54,15 @@ export class QueueState {
             this.lastMaxId = currentMaxId;
 
             try {
-                if (this.audioUnlocked) {
-                    const soundPath = newData.settings?.notificationSound || 'notification/masuk.mp3';
-                    const audio = new Audio('/' + soundPath);
-                    audio.play().catch(e => console.error("Play error", e));
+                if (this.audioUnlocked && this.audioPlayer) {
+                    const soundPath = this.notificationSound;
+
+                    if (this.audioPlayer.src.indexOf(soundPath) === -1) {
+                        this.audioPlayer.src = '/' + soundPath;
+                    }
+
+                    this.audioPlayer.currentTime = 0;
+                    this.audioPlayer.play().catch(e => console.error("Play error", e));
                 }
             } catch (e) {
                 console.error("Audio playback error", e);
@@ -68,28 +82,19 @@ export class QueueState {
         this.activeTab === "pending" ? this.pendingOrders : this.readyOrders
     );
 
-    async handleStatusUpdate(
-        id: number | undefined,
-        targetStatus: "completed" | "picked_up"
-    ) {
+
+
+    async handleStatusUpdate(id: number | undefined, targetStatus: "completed" | "picked_up") {
         if (!id) return;
 
-        const loadingTitle =
-            targetStatus === "completed"
-                ? "Menyelesaikan Pesanan"
-                : "Menyerahkan Pesanan";
-        const loadingMsg =
-            targetStatus === "completed"
-                ? "Sedang memindahkan ke Siap Ambil..."
-                : "Sedang menandai pesanan selesai diambil...";
+        const config = {
+            completed: { title: "Menyelesaikan Pesanan", msg: "Sedang memindahkan ke Siap Ambil..." },
+            picked_up: { title: "Menyerahkan Pesanan", msg: "Sedang menandai pesanan selesai diambil..." }
+        }[targetStatus];
 
-        ui.showLoading(loadingTitle, loadingMsg);
-        try {
-            await apiCall("updateStatus", { id, status: targetStatus });
-            await invalidateAll();
-        } finally {
-            setTimeout(() => ui.hideLoading(), 500);
-        }
+        await ui.withLoading(config.title, config.msg, () =>
+            apiCall("updateStatus", { id, status: targetStatus })
+        );
     }
 
     openEditModal(order: Order) {
@@ -120,30 +125,36 @@ export class QueueState {
     async saveEdit() {
         if (!this.editingOrder?.id) return;
 
-        const total = this.editedItems.reduce(
-            (acc, curr) => acc + curr.price * curr.quantity,
-            0
-        );
-        const change =
-            this.editingOrder.cash > 0
-                ? Math.max(0, this.editingOrder.cash - total)
-                : 0;
+        const total = this.editedItems.reduce((acc, curr) => acc + curr.price * curr.quantity, 0);
+        const change = this.editingOrder.cash > 0 ? Math.max(0, this.editingOrder.cash - total) : 0;
 
-        ui.showLoading("Menyimpan Perubahan", "Sedang memperbarui data pesanan...");
-        try {
-            await apiCall("updateOrder", {
-                id: this.editingOrder.id,
+        await ui.withLoading("Menyimpan Perubahan", "Sedang memperbarui data pesanan...", () =>
+            apiCall("updateOrder", {
+                id: this.editingOrder!.id!,
                 order: {
                     items: this.editedItems,
                     total,
                     change,
-                    catatan: this.editingOrder.catatan,
+                    catatan: this.editingOrder!.catatan,
                 },
-            });
-            await invalidateAll();
-            this.showEditModal = false;
-        } finally {
-            setTimeout(() => ui.hideLoading(), 500);
+            })
+        );
+        this.showEditModal = false;
+    }
+
+    startPolling() {
+        if (this.pollInterval) return;
+        this.pollInterval = setInterval(() => {
+            if (!this.showEditModal) {
+                invalidateAll();
+            }
+        }, 3000);
+    }
+
+    stopPolling() {
+        if (this.pollInterval) {
+            clearInterval(this.pollInterval);
+            this.pollInterval = null;
         }
     }
 }

@@ -1,7 +1,6 @@
 import type { OrderItem, ProductType, AppSettings, Order } from "$lib/models";
-import { ui } from "$lib/state/ui.svelte";
+import { ui } from "$lib/ui.svelte";
 import { apiCall } from "$lib/utils";
-import { invalidateAll } from "$app/navigation";
 
 export class OrderState {
     // Reactive data sources
@@ -87,33 +86,23 @@ export class OrderState {
     async submitOrder() {
         if (this.cart.length === 0) return;
 
-        ui.showLoading(
+        await ui.withLoading(
             "Memproses Pesanan",
             "Mohon tunggu sebentar, sedang menyimpan data ke server...",
-        );
-
-        try {
-            await apiCall("addOrder", {
-                customerName: this.customerName.trim() || "Pelanggan Umum",
-                items: $state.snapshot(this.cart),
-                total: this.total,
-                cash: this.showCashCard ? this.cash || 0 : 0,
-                change: this.showCashCard ? this.change : 0,
-                catatan: this.catatan.trim(),
-                date: new Date().toISOString().split("T")[0],
-            });
-
-            this.resetForm();
-            await invalidateAll();
-
-            setTimeout(() => {
-                ui.hideLoading();
+            async () => {
+                await apiCall("addOrder", {
+                    customerName: this.customerName.trim() || "Pelanggan Umum",
+                    items: $state.snapshot(this.cart),
+                    total: this.total,
+                    cash: this.showCashCard ? this.cash || 0 : 0,
+                    change: this.showCashCard ? this.change : 0,
+                    catatan: this.catatan.trim(),
+                    date: new Date().toISOString().split("T")[0],
+                });
+                this.resetForm();
                 this.showConfirmModal = false;
-            }, 500);
-        } catch (e) {
-            ui.hideLoading();
-            console.error(e);
-        }
+            }
+        );
     }
 
     resetForm() {

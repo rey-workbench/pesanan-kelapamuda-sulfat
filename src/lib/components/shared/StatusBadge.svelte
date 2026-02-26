@@ -1,4 +1,6 @@
 <script lang="ts">
+    import Badge from "$lib/components/ui/Badge.svelte";
+
     let { status } = $props<{ status: string }>();
 
     function getStatusLabel(status: string) {
@@ -9,14 +11,14 @@
         return status;
     }
 
-    function getStatusClasses(status: string) {
-        if (status === "picked_up") return "badge-emerald";
-        if (status === "completed") return "badge-blue";
-        if (status === "cancelled") return "badge-red";
-        return "badge-slate";
+    function getVariant(status: string) {
+        if (status === "picked_up") return "emerald";
+        if (status === "completed") return "blue";
+        if (status === "cancelled") return "danger";
+        return "slate";
     }
 </script>
 
-<div class="inline-flex items-center {getStatusClasses(status)}">
+<Badge variant={getVariant(status)}>
     {getStatusLabel(status)}
-</div>
+</Badge>

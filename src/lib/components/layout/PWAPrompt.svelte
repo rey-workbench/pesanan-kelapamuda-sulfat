@@ -69,7 +69,7 @@
                 </div>
                 <div>
                     <h3
-                        class="font-bold text-slate-900 text-sm tracking-tight leading-tight mb-0.5"
+                        class="font-bold text-white text-sm tracking-tight leading-tight mb-0.5"
                     >
                         Install Aplikasi
                     </h3>

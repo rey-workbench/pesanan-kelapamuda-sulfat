@@ -1,11 +1,11 @@
 <script lang="ts">
 	import "../app.css";
 	import { page } from "$app/state";
-	import BottomNav from "$lib/components/BottomNav.svelte";
-	import Header from "$lib/components/Header.svelte";
-	import Modal from "$lib/components/Modal.svelte";
-	import PWAPrompt from "$lib/components/PWAPrompt.svelte";
-	import { ui } from "$lib/state/ui.svelte";
+	import BottomNav from "$lib/components/layout/BottomNav.svelte";
+	import Header from "$lib/components/layout/Header.svelte";
+	import Modal from "$lib/components/layout/Modal.svelte";
+	import PWAPrompt from "$lib/components/layout/PWAPrompt.svelte";
+	import { ui } from "$lib/ui.svelte";
 
 	let { data, children } = $props();
 

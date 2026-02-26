@@ -1,18 +1,16 @@
-export const ui = $state({
-    title: 'Pesan Degan',
-    subtitle: '',
-    pending: null as number | null,
-    completed: null as number | null,
-    showBack: false,
+class UIState {
+    title = $state('Pesan Degan');
+    subtitle = $state('');
+    pending = $state<number | null>(null);
+    completed = $state<number | null>(null);
+    showBack = $state(false);
 
-    // Global Loading state
-    loading: {
+    loading = $state({
         show: false,
         title: '',
         message: ''
-    },
+    });
 
-    // Helper to reset and set new values
     setPage(config: {
         title?: string,
         subtitle?: string,
@@ -25,14 +23,26 @@ export const ui = $state({
         this.pending = config.pending ?? null;
         this.completed = config.completed ?? null;
         this.showBack = config.showBack ?? false;
-    },
+    }
 
-    // Helper to show/hide loading
     showLoading(title: string = 'Mohon Tunggu', message: string = 'Sedang memproses data...') {
         this.loading = { show: true, title, message };
-    },
+    }
 
     hideLoading() {
         this.loading.show = false;
     }
-});
+
+    async withLoading(title: string, message: string, action: () => Promise<void>) {
+        const { invalidateAll } = await import('$app/navigation');
+        this.showLoading(title, message);
+        try {
+            await action();
+            await invalidateAll();
+        } finally {
+            setTimeout(() => this.hideLoading(), 500);
+        }
+    }
+}
+
+export const ui = new UIState();

@@ -1,7 +1,6 @@
 import type { AppSettings } from "$lib/models";
-import { ui } from "$lib/state/ui.svelte";
+import { ui } from "$lib/ui.svelte";
 import { apiCall } from "$lib/utils";
-import { invalidateAll } from "$app/navigation";
 
 export class SettingsState {
     data = $state<{ settings: AppSettings }>();
@@ -12,6 +11,11 @@ export class SettingsState {
     modalMessage = $state("");
     modalType = $state<"confirm" | "info" | "danger">("confirm");
     private _onConfirm: (() => void) | null = null;
+
+    availableSounds = [
+        { name: "Standard (Masuk)", path: "notification/masuk.mp3" },
+        { name: "Varian (Masuk 2)", path: "notification/masuk2.mp3" },
+    ];
 
     constructor(initialData: { settings: AppSettings }) {
         this.data = initialData;
@@ -70,12 +74,14 @@ export class SettingsState {
 
     private async _doSave() {
         if (!this.settings) return;
-        ui.showLoading("Menyimpan", "Sedang memperbarui konfigurasi toko...");
-        try {
-            await apiCall("saveSettings", $state.snapshot(this.settings));
-            await invalidateAll();
-        } finally {
-            setTimeout(() => ui.hideLoading(), 500);
-        }
+        await ui.withLoading("Menyimpan", "Sedang memperbarui konfigurasi toko...", () =>
+            apiCall("saveSettings", $state.snapshot(this.settings!))
+        );
+    }
+
+    previewSound() {
+        if (!this.settings?.notificationSound) return;
+        const audio = new Audio(`/${this.settings.notificationSound}`);
+        audio.play().catch(console.error);
     }
 }

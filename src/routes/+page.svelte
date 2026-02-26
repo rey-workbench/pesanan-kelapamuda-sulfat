@@ -1,10 +1,14 @@
 <script lang="ts">
     import { onMount } from "svelte";
     import { goto } from "$app/navigation";
-    import { ui } from "$lib/state/ui.svelte";
+    import { ui } from "$lib/ui.svelte";
 
     let videoEl: HTMLVideoElement | undefined = $state();
     let isIOS = $state(false);
+
+    function startRedirect(delay: number = 3000) {
+        setTimeout(() => goto("/order"), delay);
+    }
 
     onMount(() => {
         ui.setPage({ title: "", subtitle: "", showBack: false });
@@ -14,16 +18,12 @@
             (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 
         if (isIOS) {
-            setTimeout(() => goto("/order"), 3000);
+            startRedirect(3000);
         }
     });
 
-    function onVideoEnded() {
+    function handleEnd() {
         goto("/order");
-    }
-
-    function onVideoError() {
-        setTimeout(() => goto("/order"), 3000);
     }
 </script>
 
@@ -41,8 +41,8 @@
             playsinline
             muted
             class="splash-video"
-            onended={onVideoEnded}
-            onerror={onVideoError}
+            onended={handleEnd}
+            onerror={() => startRedirect(3000)}
         ></video>
     </div>
 {/if}
