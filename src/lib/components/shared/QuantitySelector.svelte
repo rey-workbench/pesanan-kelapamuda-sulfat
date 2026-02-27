@@ -13,9 +13,26 @@
     }>();
 
     function update(delta: number) {
-        const newVal = Math.max(min, quantity + delta);
+        let current =
+            typeof quantity === "number" && !isNaN(quantity) ? quantity : 0;
+        const newVal = Math.max(min, current + delta);
         if (newVal !== quantity) {
             quantity = newVal;
+            onUpdate?.(quantity);
+        }
+    }
+
+    function handleInput(e: Event) {
+        const val = parseInt((e.target as HTMLInputElement).value);
+        if (!isNaN(val)) {
+            quantity = val;
+            onUpdate?.(quantity);
+        }
+    }
+
+    function handleBlur() {
+        if (typeof quantity !== "number" || isNaN(quantity) || quantity < min) {
+            quantity = min;
             onUpdate?.(quantity);
         }
     }
@@ -31,11 +48,14 @@
     >
         <Minus size={18} strokeWidth={3} />
     </Button>
-    <span
-        class="flex-1 text-center text-2xl font-black font-mono text-slate-900"
-    >
-        {quantity}
-    </span>
+    <input
+        type="number"
+        inputmode="numeric"
+        value={quantity}
+        oninput={handleInput}
+        onblur={handleBlur}
+        class="flex-1 w-16 text-center text-3xl font-black font-mono text-slate-900 bg-transparent border-none p-0 focus:ring-0 [&::-webkit-inner-spin-button]:appearance-none min-w-0"
+    />
     <Button
         variant="secondary"
         size="sm"

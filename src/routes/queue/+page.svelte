@@ -9,6 +9,7 @@
     import { ui } from "$lib/ui.svelte";
     import { QueueState } from "$lib/state/queue.svelte";
     import OrderCard from "$lib/components/shared/OrderCard.svelte";
+    import Textarea from "$lib/components/ui/Textarea.svelte";
 
     let { data } = $props();
 
@@ -127,10 +128,9 @@
         <div class="space-y-5 max-h-[60vh] overflow-y-auto px-1 py-1 text-left">
             <div class="space-y-2">
                 <SectionHeader title="Catatan" />
-                <input
-                    type="text"
+                <Textarea
                     bind:value={state.editingOrder.catatan}
-                    class="w-full h-11 bg-slate-50 rounded-xl px-4 border border-slate-200 text-sm font-bold text-slate-900 outline-none focus:border-blue-500 transition-colors"
+                    class="min-h-[80px]"
                     placeholder="Tambah catatan..."
                 />
             </div>
@@ -142,9 +142,16 @@
                         class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-3"
                     >
                         <div class="flex justify-between items-center">
-                            <span class="font-bold text-slate-900 text-sm"
-                                >{it.type}</span
+                            <select
+                                bind:value={it.type}
+                                class="bg-transparent font-bold text-slate-900 text-sm border-none outline-none focus:ring-0 p-0 cursor-pointer pr-4"
                             >
+                                {#each state.data?.settings?.products || [] as prod}
+                                    <option value={prod.name}
+                                        >{prod.name}</option
+                                    >
+                                {/each}
+                            </select>
                             <div class="w-32">
                                 <QuantitySelector bind:quantity={it.quantity} />
                             </div>

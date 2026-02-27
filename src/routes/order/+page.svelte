@@ -8,6 +8,7 @@
     import Button from "$lib/components/ui/Button.svelte";
     import Card from "$lib/components/ui/Card.svelte";
     import Input from "$lib/components/ui/Input.svelte";
+    import Textarea from "$lib/components/ui/Textarea.svelte";
     import Toggle from "$lib/components/ui/Toggle.svelte";
     import QuantitySelector from "$lib/components/shared/QuantitySelector.svelte";
     import CartSummary from "$lib/components/shared/CartSummary.svelte";
@@ -145,12 +146,11 @@
     <!-- Catatan (optional) -->
     <section class="space-y-2">
         <SectionHeader title="Catatan (Opsional)" />
-        <textarea
+        <Textarea
             bind:value={state.catatan}
             placeholder="Catatan untuk pesanan ini..."
-            rows={2}
-            class="w-full bg-white rounded-xl px-4 py-3 border border-slate-200 text-sm font-medium text-slate-900 placeholder-slate-400 outline-none focus:border-emerald-500 transition-colors resize-none"
-        ></textarea>
+            class="min-h-[80px]"
+        />
     </section>
 
     <!-- Cash payment toggle -->

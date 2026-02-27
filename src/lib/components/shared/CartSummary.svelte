@@ -102,15 +102,15 @@
                             >
                                 <td
                                     colspan="4"
-                                    class="px-5 py-3 text-[10px] text-amber-800 italic font-medium"
+                                    class="px-5 py-3 text-sm text-amber-800 italic font-medium leading-snug"
                                 >
                                     <div class="flex gap-2 items-start">
                                         <span
-                                            class="font-black uppercase tracking-widest text-[9px] bg-amber-100 px-1.5 py-0.5 rounded border border-amber-200 shrink-0 mt-0.5"
+                                            class="font-black uppercase tracking-widest text-[10px] bg-amber-100 px-1.5 py-0.5 rounded border border-amber-200 shrink-0 mt-[2px]"
                                         >
                                             Catatan
                                         </span>
-                                        <span class="pt-0.5"
+                                        <span class="text-wrap min-w-0"
                                             >{state.catatan}</span
                                         >
                                     </div>
