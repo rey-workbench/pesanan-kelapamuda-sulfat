@@ -64,6 +64,14 @@
   body {
     @apply font-outfit bg-slate-50 text-slate-900 min-h-screen relative selection:bg-emerald-200 selection:text-emerald-900;
     -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  
+  input, textarea {
+    user-select: auto;
+    -webkit-user-select: auto;
   }
   
   main {

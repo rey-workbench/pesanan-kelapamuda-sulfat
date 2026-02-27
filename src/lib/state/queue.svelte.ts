@@ -97,6 +97,13 @@ export class QueueState {
         );
     }
 
+    async deleteOrder(id: number | undefined) {
+        if (!id) return;
+        await ui.withLoading("Menghapus Pesanan", "Sedang menghapus...", () =>
+            apiCall("deleteOrder", { id })
+        );
+    }
+
     openEditModal(order: Order) {
         this.editingOrder = { ...order };
         this.editedItems = order.items.map((it) => ({

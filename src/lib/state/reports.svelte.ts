@@ -11,6 +11,10 @@ export class ReportsState {
     showDeleteModal = $state(false);
     deleteId = $state<number | null>(null);
 
+    isSelectionMode = $state(false);
+    selectedIds = $state<number[]>([]);
+    showBulkDeleteModal = $state(false);
+
     constructor(initialData: { orders: Order[]; settings: AppSettings }) {
         this.data = initialData;
         this.filterDate = this.today;
@@ -107,6 +111,47 @@ export class ReportsState {
         await ui.withLoading('Menghapus', 'Menghapus pesanan...', async () => {
             await apiCall("deleteOrder", { id: this.deleteId });
             this.showDeleteModal = false;
+        });
+    }
+
+    toggleSelectionMode() {
+        this.isSelectionMode = !this.isSelectionMode;
+        if (!this.isSelectionMode) {
+            this.selectedIds = [];
+        }
+    }
+
+    toggleSelection(id: number) {
+        if (this.selectedIds.includes(id)) {
+            this.selectedIds = this.selectedIds.filter(i => i !== id);
+        } else {
+            this.selectedIds = [...this.selectedIds, id];
+        }
+    }
+
+    selectAll() {
+        if (this.selectedIds.length === this.filteredOrders.length) {
+            this.selectedIds = [];
+        } else {
+            this.selectedIds = this.filteredOrders.map(o => o.id!);
+        }
+    }
+
+    openBulkDeleteModal() {
+        if (this.selectedIds.length > 0) {
+            this.showBulkDeleteModal = true;
+        }
+    }
+
+    async confirmBulkDelete() {
+        if (this.selectedIds.length === 0) return;
+
+        await ui.withLoading('Menghapus', `Menghapus ${this.selectedIds.length} pesanan...`, async () => {
+            const promises = this.selectedIds.map(id => apiCall("deleteOrder", { id }));
+            await Promise.all(promises);
+            this.showBulkDeleteModal = false;
+            this.isSelectionMode = false;
+            this.selectedIds = [];
         });
     }
 }

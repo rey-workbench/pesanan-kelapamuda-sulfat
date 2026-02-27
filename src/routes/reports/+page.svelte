@@ -89,7 +89,24 @@
 
     <!-- Order list -->
     <section class="space-y-2">
-        <SectionHeader title="Pesanan ({state.filteredOrders.length})" />
+        <div class="flex items-center justify-between">
+            <SectionHeader
+                title="Pesanan ({state.filteredOrders.length})"
+                class="mb-0"
+            />
+            {#if state.filteredOrders.length > 0}
+                <Button
+                    variant="unstyled"
+                    size="sm"
+                    class="text-xs font-bold text-slate-500 bg-white border border-slate-200 px-3 py-1.5 rounded-lg active:scale-95 transition-all {state.isSelectionMode
+                        ? 'bg-slate-100 text-slate-800'
+                        : ''}"
+                    onclick={() => state.toggleSelectionMode()}
+                >
+                    {state.isSelectionMode ? "Batal" : "Pilih"}
+                </Button>
+            {/if}
+        </div>
         <div class="space-y-2">
             {#each state.filteredOrders as item (item.id)}
                 <ReportItem {item} {state} />
@@ -125,3 +142,51 @@
     type="danger"
     onConfirm={() => state.confirmDelete()}
 />
+
+<Modal
+    bind:show={state.showBulkDeleteModal}
+    title="Hapus Pesanan Terpilih"
+    message={`Yakin ingin menghapus ${state.selectedIds.length} pesanan? Data yang sudah dihapus tidak dapat dikembalikan.`}
+    confirmText="Hapus"
+    cancelText="Batal"
+    type="danger"
+    onConfirm={() => state.confirmBulkDelete()}
+/>
+
+{#if state.isSelectionMode}
+    <div
+        class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 pb-8 flex items-center justify-between shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-40 max-w-md mx-auto animate-in slide-in-from-bottom-full duration-200"
+    >
+        <div class="flex flex-col">
+            <span
+                class="text-[10px] font-black uppercase tracking-widest text-slate-500"
+                >Terpilih</span
+            >
+            <span class="text-base font-black text-slate-900"
+                >{state.selectedIds.length} Pesanan</span
+            >
+        </div>
+        <div class="flex items-center gap-2">
+            <Button
+                variant="secondary"
+                size="sm"
+                class="h-10 px-4 rounded-xl text-xs"
+                onclick={() => state.selectAll()}
+            >
+                {state.selectedIds.length === state.filteredOrders.length &&
+                state.filteredOrders.length > 0
+                    ? "Batal Semua"
+                    : "Pilih Semua"}
+            </Button>
+            <Button
+                variant="danger"
+                size="sm"
+                class="h-10 px-4 rounded-xl text-xs"
+                disabled={state.selectedIds.length === 0}
+                onclick={() => state.openBulkDeleteModal()}
+            >
+                Hapus
+            </Button>
+        </div>
+    </div>
+{/if}
