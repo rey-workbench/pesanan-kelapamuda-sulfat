@@ -129,6 +129,14 @@ export class QueueState {
         }
     }
 
+    updateItemType(itemIndex: number, newType: string) {
+        const product = this.data?.settings?.products?.find((p) => p.name === newType);
+        if (product) {
+            this.editedItems[itemIndex].type = product.name;
+            this.editedItems[itemIndex].price = product.price;
+        }
+    }
+
     async saveEdit() {
         if (!this.editingOrder?.id) return;
 

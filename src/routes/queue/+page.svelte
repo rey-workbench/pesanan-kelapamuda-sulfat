@@ -143,7 +143,12 @@
                     >
                         <div class="flex justify-between items-center">
                             <select
-                                bind:value={it.type}
+                                value={it.type}
+                                onchange={(e) =>
+                                    state.updateItemType(
+                                        idx,
+                                        (e.target as HTMLSelectElement).value,
+                                    )}
                                 class="bg-transparent font-bold text-slate-900 text-sm border-none outline-none focus:ring-0 p-0 cursor-pointer pr-4"
                             >
                                 {#each state.data?.settings?.products || [] as prod}
