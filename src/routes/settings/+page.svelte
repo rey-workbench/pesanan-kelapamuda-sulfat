@@ -208,8 +208,8 @@
                 </p>
                 <Button
                     variant="danger"
-                    size="md"
-                    class="w-full font-bold shadow-sm"
+                    size="sm"
+                    class="w-full"
                     onclick={async () => {
                         try {
                             const res = await fetch("/api", {
@@ -219,21 +219,29 @@
                             });
                             const json = await res.json();
                             if (res.ok) {
-                                alert(
+                                cfg.showAlert(
+                                    "Database Disiapkan",
                                     json.message ||
                                         "Database berhasil disiapkan.",
+                                    "info",
                                 );
                             } else {
-                                alert(
+                                cfg.showAlert(
+                                    "Gagal Menyiapkan Database",
                                     "Gagal menyiapkan database: " + json.error,
+                                    "danger",
                                 );
                             }
                         } catch (e) {
-                            alert("Terjadi kesalahan: " + e);
+                            cfg.showAlert(
+                                "Terjadi Kesalahan",
+                                "Terjadi kesalahan: " + e,
+                                "danger",
+                            );
                         }
                     }}
                 >
-                    <Database size={16} class="mr-1.5" strokeWidth={2.5} />
+                    <Database size={14} strokeWidth={2.5} />
                     Setup Tabel Database
                 </Button>
             </div>

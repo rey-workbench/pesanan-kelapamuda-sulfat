@@ -52,6 +52,15 @@ export class SettingsState {
         this.settings.options = this.settings.options.filter((_, i) => i !== index);
     }
 
+    showAlert(title: string, message: string, type: "info" | "danger" = "info") {
+        this.modalTitle = title;
+        this.modalMessage = message;
+        this.modalType = type;
+        this._onConfirm = null;
+        this.showModal = true;
+    }
+
+
     saveSettings() {
         if (!this.settings?.storeName?.trim()) {
             this.modalTitle = "Perhatian";
@@ -84,4 +93,5 @@ export class SettingsState {
         const audio = new Audio(`/${this.settings.notificationSound}`);
         audio.play().catch(console.error);
     }
+
 }

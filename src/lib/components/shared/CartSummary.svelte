@@ -37,14 +37,13 @@
                 .replace("Rp", "")
                 .trim()}
         </td>
-        <td class="px-2 py-4 text-center">
+        <td class="pr-5 pl-2 py-4">
             <Button
                 variant="unstyled"
-                size="sm"
-                class="w-8 h-8 p-0 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                class="w-12 h-12 p-0 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 transition-colors flex items-center justify-center ml-auto hover:scale-105 active:scale-95"
                 onclick={() => state.removeFromCart(i)}
             >
-                <X size={18} strokeWidth={3} />
+                <X class="w-7 h-7" strokeWidth={3} />
             </Button>
         </td>
     </tr>
@@ -63,7 +62,7 @@
                             <th class="px-5 py-4">Item</th>
                             <th class="px-3 py-4 text-center">Qty</th>
                             <th class="px-5 py-4 text-right">Total</th>
-                            <th class="w-12"></th>
+                            <th class="w-16"></th>
                         </tr>
                     </thead>
                     <tbody class="text-sm divide-y divide-slate-100">

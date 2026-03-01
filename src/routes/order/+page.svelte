@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { User, Plus } from "lucide-svelte";
+    import { User, Plus, Send } from "lucide-svelte";
     import { ui } from "$lib/ui.svelte";
     import { formatCurrency } from "$lib/utils";
     import { goto } from "$app/navigation";
@@ -101,16 +101,14 @@
     {#if state.data?.settings?.options && state.data.settings.options.length > 0}
         <section class="space-y-2">
             <SectionHeader title="Pilih Opsi" />
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-2.5">
                 {#each state.data.settings.options as opt}
+                    {@const isSelected = state.selectedOptions.includes(opt)}
                     <Button
                         variant="unstyled"
-                        size="sm"
-                        class="px-4 py-2 rounded-xl border-2 text-sm font-bold transition-all {state.selectedOptions.includes(
-                            opt,
-                        )
-                            ? 'bg-emerald-600 border-emerald-600 text-white'
-                            : 'bg-white border-slate-200 text-slate-700'}"
+                        class="px-5 py-2.5 rounded-2xl border-2 text-sm font-bold transition-all active:scale-95 {isSelected
+                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-md shadow-emerald-200'
+                            : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-300 hover:bg-emerald-50'}"
                         onclick={() => state.toggleOption(opt)}
                     >
                         {opt}
@@ -217,8 +215,8 @@
     <!-- Submit -->
     <Button
         variant="emerald"
-        size="lg"
-        class="w-full uppercase tracking-widest shadow-lg"
+        size="md"
+        class="w-full tracking-widest shadow-lg"
         onclick={() => (state.showConfirmModal = true)}
         disabled={state.cart.length === 0 ||
             (state.showCashCard &&
@@ -226,6 +224,7 @@
                 state.cash > 0 &&
                 state.change < 0)}
     >
+        <Send size={18} strokeWidth={3} />
         Simpan Pesanan
     </Button>
 </div>
