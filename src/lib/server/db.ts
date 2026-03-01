@@ -16,8 +16,7 @@ const client = createClient({
 
 let initialized = false;
 
-// Inisialisasi Tabel secara asinkron
-export async function initDB() {
+export async function setupDatabaseTables() {
     if (initialized) return;
 
     // Turso / LibSQL menggunakan dialek SQLite

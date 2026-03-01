@@ -1,17 +1,12 @@
-import client, { initDB } from './db';
+import client from './db';
 import type { Order, AppSettings, OrderItem } from '../models';
 import { DEFAULT_SETTINGS } from '../models';
 
-// ── In-memory server-side cache ───────────────────────────────────────────────
 let cachedSettings: { data: AppSettings; timestamp: number } | null = null;
 
 const SETTINGS_CACHE_TTL = 5 * 60 * 1000;  // 5 minutes — settings rarely change
 
-export const dataService = {
-    async init() {
-        await initDB();
-    },
-
+export const dbQueries = {
     async getSettings(): Promise<AppSettings> {
         const now = Date.now();
         if (cachedSettings && (now - cachedSettings.timestamp) < SETTINGS_CACHE_TTL) {

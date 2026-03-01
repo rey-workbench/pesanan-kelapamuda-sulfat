@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Plus, X, Save, Volume2 } from "lucide-svelte";
+    import { Plus, X, Save, Volume2, Database } from "lucide-svelte";
     import Modal from "$lib/components/layout/Modal.svelte";
     import SectionHeader from "$lib/components/ui/SectionHeader.svelte";
     import Card from "$lib/components/ui/Card.svelte";
@@ -8,7 +8,7 @@
     import Input from "$lib/components/ui/Input.svelte";
     import Toggle from "$lib/components/ui/Toggle.svelte";
     import { ui } from "$lib/ui.svelte";
-    import { SettingsState } from "$lib/state/settings.svelte";
+    import { SettingsState } from "$lib/state/settings.svelte.js";
     import type { ProductType } from "$lib/models";
 
     let { data } = $props();
@@ -167,12 +167,13 @@
                     >Suara Pesanan Masuk</label
                 >
                 <div class="flex gap-2">
+                    <!-- svelte-ignore binding_property_non_reactive -->
                     <select
                         id="notif-sound"
-                        bind:value={cfg.settings!.notificationSound}
+                        bind:value={(cfg.settings as any).notificationSound}
                         class="grow h-11 bg-slate-50 rounded-xl px-3 border border-slate-200 text-sm font-bold text-slate-900 outline-none focus:border-emerald-500 transition-colors"
                     >
-                        {#each cfg.availableSounds as sound}
+                        {#each (cfg as any).availableSounds || [] as sound}
                             <option value={sound.path}>{sound.name}</option>
                         {/each}
                     </select>
@@ -180,11 +181,61 @@
                         variant="ghost"
                         size="md"
                         class="bg-slate-50 border border-slate-200 rounded-xl w-11 h-11 p-0 flex items-center justify-center text-slate-600 hover:text-emerald-600"
-                        onclick={() => cfg.previewSound()}
+                        onclick={() => (cfg as any).previewSound()}
                     >
                         <Volume2 size={20} />
                     </Button>
                 </div>
+            </div>
+        </Card>
+    </section>
+    <!-- Database Setup -->
+    <section class="space-y-3">
+        <div class="flex items-center justify-between px-1">
+            <SectionHeader title="Sistem Database" />
+            <span
+                class="px-2 py-0.5 bg-rose-100 text-rose-700 text-[9px] font-bold tracking-widest uppercase rounded-full border border-rose-200"
+            >
+                Developer Access
+            </span>
+        </div>
+        <Card padding="sm" class="space-y-4 border-rose-100 bg-rose-50/50">
+            <div class="space-y-3">
+                <p class="text-[11px] font-medium px-1">
+                    Gunakan fitur ini hanya untuk membuat strukur tabel database
+                    baru saat pertama kali menyiapkan aplikasi, atau jika tabel
+                    database terhapus. Berisiko mereset data!
+                </p>
+                <Button
+                    variant="danger"
+                    size="md"
+                    class="w-full font-bold shadow-sm"
+                    onclick={async () => {
+                        try {
+                            const res = await fetch("/api", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ action: "initdb" }),
+                            });
+                            const json = await res.json();
+                            if (res.ok) {
+                                alert(
+                                    json.message ||
+                                        "Database berhasil disiapkan.",
+                                );
+                            } else {
+                                alert(
+                                    "Gagal menyiapkan database: " + json.error,
+                                );
+                            }
+                        } catch (e) {
+                            alert("Terjadi kesalahan: " + e);
+                        }
+                    }}
+                >
+                    <Database size={16} class="mr-1.5" strokeWidth={2.5} />
+                    Setup Tabel Database
+                </Button>
             </div>
         </Card>
     </section>

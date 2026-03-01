@@ -1,11 +1,10 @@
 import type { LayoutServerLoad } from './$types';
-import { dataService } from '$lib/server/dataService';
+import { dbQueries } from '$lib/server/queries';
 
 export const load: LayoutServerLoad = async () => {
-    await dataService.init();
     const [settings, queue] = await Promise.all([
-        dataService.getSettings(),
-        dataService.getTodayQueue(),
+        dbQueries.getSettings(),
+        dbQueries.getTodayQueue(),
     ]);
 
     return { settings, queue };

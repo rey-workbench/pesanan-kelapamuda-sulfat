@@ -1,33 +1,36 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { dataService } from '$lib/server/dataService';
+import { dbQueries } from '$lib/server/queries';
+import { setupDatabaseTables } from '$lib/server/db';
 
 export const POST: RequestHandler = async ({ request }) => {
     try {
         const body = await request.json();
         const { action, payload } = body;
 
-        await dataService.init();
-
         switch (action) {
+            case 'initdb':
+                await setupDatabaseTables();
+                return json({ success: true, message: 'Database berhasil disiapkan!' });
+
             case 'addOrder':
-                await dataService.addOrder(payload);
+                await dbQueries.addOrder(payload);
                 return json({ success: true });
 
             case 'updateStatus':
-                await dataService.updateOrderStatus(payload.id, payload.status);
+                await dbQueries.updateOrderStatus(payload.id, payload.status);
                 return json({ success: true });
 
             case 'updateOrder':
-                await dataService.updateOrder(payload.id, payload.order);
+                await dbQueries.updateOrder(payload.id, payload.order);
                 return json({ success: true });
 
             case 'deleteOrder':
-                await dataService.deleteOrder(payload.id);
+                await dbQueries.deleteOrder(payload.id);
                 return json({ success: true });
 
             case 'saveSettings':
-                await dataService.saveSettings(payload);
+                await dbQueries.saveSettings(payload);
                 return json({ success: true });
 
             default:
