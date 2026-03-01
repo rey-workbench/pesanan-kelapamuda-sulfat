@@ -3,8 +3,11 @@ import type { Order, AppSettings, OrderItem } from '../models';
 import { DEFAULT_SETTINGS } from '../models';
 
 let cachedSettings: { data: AppSettings; timestamp: number } | null = null;
+let cachedOrders: { data: Order[]; timestamp: number } | null = null;
+let isFetchingOrders = false;
 
-const SETTINGS_CACHE_TTL = 5 * 60 * 1000;  // 5 minutes — settings rarely change
+const SETTINGS_CACHE_TTL = 5 * 60 * 1000;  // 5 minutes
+const ORDERS_CACHE_TTL = 5 * 1000; // 5 seconds stale-while-revalidate threshold
 
 export const dbQueries = {
     async getSettings(): Promise<AppSettings> {
@@ -43,8 +46,29 @@ export const dbQueries = {
     },
 
     async getOrders(): Promise<Order[]> {
-        const res = await client.execute('SELECT * FROM orders ORDER BY createdAt DESC');
-        return res.rows.map(row => this._mapOrder(row));
+        const fetchOrders = async () => {
+            if (isFetchingOrders) return;
+            isFetchingOrders = true;
+            try {
+                const res = await client.execute('SELECT * FROM orders ORDER BY createdAt DESC');
+                const parsed = res.rows.map(row => this._mapOrder(row));
+                cachedOrders = { data: parsed, timestamp: Date.now() };
+                return parsed;
+            } finally {
+                isFetchingOrders = false;
+            }
+        };
+
+        if (cachedOrders && cachedOrders.data) {
+            // Trigger background fetch if cache is stale (stale-while-revalidate)
+            if (!isFetchingOrders && Date.now() - cachedOrders.timestamp > ORDERS_CACHE_TTL) {
+                fetchOrders().catch(console.error);
+            }
+            return cachedOrders.data;
+        }
+
+        const data = await fetchOrders();
+        return data || [];
     },
 
     _mapOrder(row: any): Order {
@@ -90,6 +114,7 @@ export const dbQueries = {
             ]
         });
 
+        this.invalidateOrdersCache();
         return res;
     },
 
@@ -98,6 +123,7 @@ export const dbQueries = {
             sql: 'UPDATE orders SET status = ? WHERE id = ?',
             args: [status, id]
         });
+        this.invalidateOrdersCache();
     },
 
     async updateOrder(id: number, updates: { items: OrderItem[]; total: number; change: number; catatan: string }) {
@@ -105,6 +131,7 @@ export const dbQueries = {
             sql: 'UPDATE orders SET items = ?, total = ?, `change` = ?, catatan = ? WHERE id = ?',
             args: [JSON.stringify(updates.items), updates.total, updates.change, updates.catatan, id],
         });
+        this.invalidateOrdersCache();
     },
 
     async deleteOrder(id: number) {
@@ -112,10 +139,15 @@ export const dbQueries = {
             sql: 'DELETE FROM orders WHERE id = ?',
             args: [id]
         });
+        this.invalidateOrdersCache();
     },
 
     // ── Manual cache invalidation 
     invalidateSettingsCache() {
         cachedSettings = null;
+    },
+
+    invalidateOrdersCache() {
+        cachedOrders = null;
     },
 };
