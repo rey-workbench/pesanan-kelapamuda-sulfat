@@ -3,7 +3,7 @@ import { ui } from "$lib/ui.svelte";
 import { apiCall } from "$lib/utils";
 
 export class SettingsState {
-    data = $state<{ settings: AppSettings }>();
+    settings = $state<AppSettings>();
 
     // Modal state
     showModal = $state(false);
@@ -18,15 +18,11 @@ export class SettingsState {
     ];
 
     constructor(initialData: { settings: AppSettings }) {
-        this.data = initialData;
+        this.settings = initialData.settings;
     }
 
     updateData(newData: { settings: AppSettings }) {
-        this.data = newData;
-    }
-
-    get settings() {
-        return this.data?.settings;
+        this.settings = newData.settings;
     }
 
     addProduct() {
