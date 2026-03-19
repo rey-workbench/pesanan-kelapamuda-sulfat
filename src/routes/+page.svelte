@@ -1,94 +1,82 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-    import { goto } from "$app/navigation";
-    import { ui } from "$lib/ui.svelte";
+  import { onMount } from "svelte";
+  import { goto } from "$app/navigation";
+  import { ui } from "$lib/ui.svelte";
 
-    let videoEl: HTMLVideoElement | undefined = $state();
-    let isIOS = $state(false);
+  function startRedirect(delay: number = 2000) {
+    setTimeout(() => goto("/order"), delay);
+  }
 
-    function startRedirect(delay: number = 3000) {
-        setTimeout(() => goto("/order"), delay);
-    }
-
-    onMount(() => {
-        ui.setPage({ title: "", subtitle: "", showBack: false });
-
-        isIOS =
-            /iphone|ipad|ipod/i.test(navigator.userAgent) ||
-            (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-
-        if (isIOS) {
-            startRedirect(3000);
-        }
-    });
-
-    function handleEnd() {
-        goto("/order");
-    }
+  onMount(() => {
+    ui.setPage({ title: "", subtitle: "", showBack: false });
+    startRedirect();
+  });
 </script>
 
-{#if isIOS}
-    <div class="icon-splash">
-        <img src="/icon-512.png" alt="Logo" class="splash-icon" />
-    </div>
-{:else}
-    <!-- svelte-ignore a11y_media_has_caption -->
-    <div class="splash-wrapper">
-        <video
-            bind:this={videoEl}
-            src="/splash.mp4"
-            autoplay
-            playsinline
-            muted
-            class="splash-video"
-            onended={handleEnd}
-            onerror={() => startRedirect(3000)}
-        ></video>
-    </div>
-{/if}
+<div class="splash-container">
+  <div class="icon-wrapper">
+    <img src="/icon-512.png" alt="Logo" class="splash-icon" />
+  </div>
+</div>
 
 <style>
-    .splash-wrapper {
-        position: fixed;
-        inset: 0;
-        background: #000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-    }
+  .splash-container {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
 
-    .splash-video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+  .icon-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-    .icon-splash {
-        position: fixed;
-        inset: 0;
-        background: #f8fafc;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-    }
+  .icon-wrapper::before {
+    content: "";
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    background: rgba(34, 197, 94, 0.1);
+    border-radius: 50%;
+    filter: blur(20px);
+    animation: glow 2s ease-in-out infinite;
+  }
 
-    .splash-icon {
-        width: 240px;
-        height: 240px;
-        object-fit: contain;
-        animation: pop-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
+  .splash-icon {
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    position: relative;
+    z-index: 1;
+    animation: reveal 1s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  }
 
-    @keyframes pop-in {
-        from {
-            opacity: 0;
-            transform: scale(0.5);
-        }
-        to {
-            opacity: 1;
-            transform: scale(1.1);
-        }
+  @keyframes reveal {
+    0% {
+      opacity: 0;
+      transform: scale(0.5) translateY(20px);
     }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes glow {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.5;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.8;
+    }
+  }
 </style>
