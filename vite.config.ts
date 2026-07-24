@@ -83,6 +83,7 @@ export default defineConfig({
             }
         },
         rollupOptions: {
+            external: ['encoding', 'bufferutil', 'utf-8-validate'],
             output: {
                 manualChunks(id) {
                     if (id.includes('lucide-svelte')) return 'vendor-icons';
