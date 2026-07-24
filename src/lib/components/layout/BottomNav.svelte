@@ -11,6 +11,7 @@
 </script>
 
 <nav
+    data-sveltekit-preload-data="hover"
     class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 px-8 py-3 pb-safe flex justify-between items-center max-w-md mx-auto"
 >
     {#each navItems as { href, label, icon: Icon }}

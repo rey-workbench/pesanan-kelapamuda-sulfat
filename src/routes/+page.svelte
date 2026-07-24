@@ -3,7 +3,7 @@
   import { goto } from "$app/navigation";
   import { ui } from "$lib/ui.svelte";
 
-  function startRedirect(delay: number = 2000) {
+  function startRedirect(delay: number = 600) {
     setTimeout(() => goto("/order"), delay);
   }
 

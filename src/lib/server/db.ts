@@ -42,6 +42,10 @@ export async function setupDatabaseTables() {
         );
     `);
 
+    // Indeks untuk optimisasi query antrean harian dan pengurutan tanggal
+    await client.execute(`CREATE INDEX IF NOT EXISTS idx_orders_date ON orders(date);`);
+    await client.execute(`CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(createdAt DESC);`);
+
     initialized = true;
 }
 

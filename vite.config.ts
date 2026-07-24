@@ -40,6 +40,19 @@ export default defineConfig({
                 globPatterns: ['**/*.{js,css,html,ico,png,svg,mp4}'],
                 navigateFallback: null,
                 maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+                runtimeCaching: [
+                    {
+                        urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'google-fonts',
+                            expiration: {
+                                maxEntries: 10,
+                                maxAgeSeconds: 60 * 60 * 24 * 365
+                            }
+                        }
+                    }
+                ]
             },
             devOptions: {
                 enabled: false,
@@ -47,5 +60,19 @@ export default defineConfig({
                 type: 'module',
             }
         })
-    ]
+    ],
+    build: {
+        target: 'esnext',
+        minify: 'terser',
+        cssMinify: true,
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (id.includes('lucide-svelte')) return 'vendor-icons';
+                    if (id.includes('xlsx')) return 'vendor-xlsx';
+                    if (id.includes('@libsql')) return 'vendor-db';
+                }
+            }
+        }
+    }
 });
