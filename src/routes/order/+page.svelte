@@ -43,7 +43,7 @@
 {#snippet menuSelection()}
     <section class="space-y-3">
         <div class="flex justify-between items-center px-1">
-            <SectionHeader title="Pilih Menu" />
+            <SectionHeader title="Pilih Menu Utama" />
             {#if state.data?.settings?.products.length === 0}
                 <Button
                     variant="ghost"
@@ -54,29 +54,36 @@
                 </Button>
             {/if}
         </div>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-2 gap-2.5">
             {#each state.data?.settings?.products || [] as product}
-                <Button
-                    variant="unstyled"
-                    size="sm"
-                    class="h-20 p-4 rounded-2xl flex flex-col items-center justify-center border-2 active:scale-[0.96] {state
-                        .selectedProduct?.name === product.name
-                        ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200'
-                        : 'bg-emerald-100/70 border-emerald-200 text-slate-800 hover:border-emerald-400'}"
+                {@const isSelected = state.selectedProduct?.name === product.name}
+                <button
+                    type="button"
+                    class="relative h-20 p-3.5 rounded-2xl flex flex-col justify-between text-left border-2 transition-all active:scale-[0.97] cursor-pointer outline-none {isSelected
+                        ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-600/30 ring-2 ring-emerald-400/50'
+                        : 'bg-white border-slate-200 text-slate-800 hover:border-emerald-300 hover:bg-emerald-50/50'}"
                     onclick={() => (state.selectedProduct = product)}
                 >
-                    <span class="text-sm font-black leading-tight mb-1"
-                        >{product.name}</span
-                    >
+                    <div class="flex justify-between items-start gap-1">
+                        <span class="text-sm font-extrabold leading-tight tracking-tight line-clamp-2">
+                            {product.name}
+                        </span>
+                        {#if isSelected}
+                            <span class="w-5 h-5 rounded-full bg-white text-emerald-600 flex items-center justify-center shrink-0 shadow-sm">
+                                <svg class="w-3.5 h-3.5 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </span>
+                        {/if}
+                    </div>
                     <span
-                        class="text-xs font-mono font-bold {state
-                            .selectedProduct?.name === product.name
+                        class="text-xs font-mono font-bold {isSelected
                             ? 'text-emerald-100'
-                            : 'text-emerald-700/70'}"
+                            : 'text-emerald-700'}"
                     >
                         {formatCurrency(product.price)}
                     </span>
-                </Button>
+                </button>
             {/each}
         </div>
     </section>
