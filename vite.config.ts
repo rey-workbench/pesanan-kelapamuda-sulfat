@@ -8,7 +8,7 @@ export default defineConfig({
         tailwindcss(),
         sveltekit(),
         SvelteKitPWA({
-            registerType: 'prompt',
+            registerType: 'autoUpdate',
             injectRegister: 'auto',
             manifest: {
                 name: 'Es Kelapa Muda Sulfat',
@@ -37,7 +37,7 @@ export default defineConfig({
                 ]
             },
             workbox: {
-                globPatterns: ['**/*.{js,css,html,ico,png,svg,mp4}'],
+                globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
                 navigateFallback: null,
                 maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
                 runtimeCaching: [
@@ -47,8 +47,19 @@ export default defineConfig({
                         options: {
                             cacheName: 'google-fonts',
                             expiration: {
-                                maxEntries: 10,
+                                maxEntries: 20,
                                 maxAgeSeconds: 60 * 60 * 24 * 365
+                            }
+                        }
+                    },
+                    {
+                        urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'static-images',
+                            expiration: {
+                                maxEntries: 50,
+                                maxAgeSeconds: 60 * 60 * 24 * 30
                             }
                         }
                     }
@@ -65,6 +76,12 @@ export default defineConfig({
         target: 'esnext',
         minify: 'terser',
         cssMinify: true,
+        terserOptions: {
+            compress: {
+                drop_console: true,
+                drop_debugger: true
+            }
+        },
         rollupOptions: {
             output: {
                 manualChunks(id) {
